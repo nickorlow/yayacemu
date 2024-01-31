@@ -31,7 +31,7 @@ yayacemu [PATH_TO_YOUR_ROM]
 
 ### Todo
 - [x] Graphics
-- [ ] Corax+ Required Instructions
+- [x] Corax+ Required Instructions
 - [ ] Proper Flag Handling 
 - [ ] Working Input
 - [ ] More Instructions
