@@ -14,7 +14,7 @@
 
 #define SCREEN_WIDTH 64
 #define SCREEN_HEIGHT 32
-#define EMULATION_HZ 480
+#define EMULATION_HZ 4000
 
 FILE *rom_file;
 SDL_Window *window;
@@ -80,6 +80,59 @@ int get_num() {
     return 1;
 }
 
+svBitVecVal get_key() {
+    SDL_Event event;
+    uint8_t down = 0;
+    while(SDL_PollEvent(&event)) {
+        switch(event.type) {
+            case SDL_KEYDOWN:
+                down = 128;
+            case SDL_KEYUP: 
+                switch(event.key.keysym.sym) {
+                    case SDLK_0:
+                        return down | (uint8_t) 0;
+                    case SDLK_1:
+                        return down | (uint8_t) 1;
+                    case SDLK_2:
+                        return down | (uint8_t) 2;
+                    case SDLK_3:
+                        return down | (uint8_t) 3;
+                    case SDLK_4:
+                        return down | (uint8_t) 4;
+                    case SDLK_5:
+                        return down | (uint8_t) 5;
+                    case SDLK_6:
+                        return down | (uint8_t) 6;
+                    case SDLK_7:
+                        return down | (uint8_t) 7;
+                    case SDLK_8:
+                        return down | (uint8_t) 8;
+                    case SDLK_9:
+                        return down | (uint8_t) 9;
+                    case SDLK_a:
+                        return down | (uint8_t) 10;
+                    case SDLK_b:
+                        return down | (uint8_t) 11;
+                    case SDLK_c:
+                        return down | (uint8_t) 12;
+                    case SDLK_d:
+                        return down | (uint8_t) 13;
+                    case SDLK_e:
+                        return down | (uint8_t) 14;
+                    case SDLK_f:
+                        return down | (uint8_t) 15;
+                    default:
+                        return 255;
+                }
+                
+            
+            default:
+                return 255; 
+        }
+    }
+    return 255;
+}
+
 int main(int argc, char** argv) {
     if (argc < 2) {
         printf("Use: yayacemu [ROM_NAME]");
@@ -90,7 +143,7 @@ int main(int argc, char** argv) {
     contextp->commandArgs(argc, argv);
     Vyayacemu* top = new Vyayacemu{contextp};
     //while (!contextp->gotFinish()) {
-    for (int i = 0; i < 2000; i++) { 
+    for (int i = 0; ; i++) { 
         top->clk_in ^= 1;
         top->eval(); 
         usleep(1000000/EMULATION_HZ);

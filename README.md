@@ -33,13 +33,14 @@ yayacemu [PATH_TO_YOUR_ROM]
 - [x] Graphics
 - [x] Corax+ Required Instructions
 - [x] Proper Flag Handling 
-- [ ] Working Input
-- [ ] More Instructions
-- [ ] Tetris Working Running
-- [ ] Pass Quirks Test 
+- [x] Working Input
+- [x] More Instructions
+- [x] Tetris Working Running
+- [x] Pass Quirks Test 
 - [ ] Add beeper (instead of sound, screen becomes red)
+- [ ] Implement a real random module 
 - [ ] Code cleanup
-- [ ] All Instructions
+- [x] All Instructions
 
 ### Screenshots
 
@@ -47,3 +48,5 @@ yayacemu [PATH_TO_YOUR_ROM]
 ![IBM Logo Demo](https://github.com/nickorlow/yayacemu/blob/main/screenshots/ibm-logo.png?raw=true)
 ![CORAX+ Test Demo](https://github.com/nickorlow/yayacemu/blob/main/screenshots/corax.png?raw=true)
 ![Flag Test Demo](https://github.com/nickorlow/yayacemu/blob/main/screenshots/flags.png?raw=true)
+![Quirk Test Demo](https://github.com/nickorlow/yayacemu/blob/main/screenshots/quirks.png?raw=true)
+![Tetris Demo](https://github.com/nickorlow/yayacemu/blob/main/screenshots/tetris.png?raw=true)

@@ -10,17 +10,27 @@ module yayacemu (
     wire [15:0] stack [0:15];
     logic [7:0] delay_timer;
     logic [7:0] sound_timer;
+    bit keyboard [15:0];
     int cycle_counter;
+    bit halt;
+    int watch_key;
 
     logic [15:0] index_reg;
     logic rom_ready;
     logic [15:0] program_counter;
 
+    keyboard kb(clk_in, keyboard);
     rom_loader rl (memory, rom_ready);
-    chip8_cpu cpu (memory, clk_in, vram, stack, index_reg, stack_pointer, registers, delay_timer, sound_timer, cycle_counter, program_counter);
+    chip8_cpu cpu (memory, clk_in, keyboard, vram, stack, index_reg, stack_pointer, registers, delay_timer, sound_timer, cycle_counter, program_counter, halt, watch_key);
     chip8_gpu gpu (vram);
 
+    int i;
     initial begin 
+        watch_key = 255;
+        halt = 0;
+        for(i = 0; i < 15; i++) begin
+            keyboard[i] = 0;
+        end
         sound_timer = 0;
         delay_timer = 0;
         cycle_counter = 0;
@@ -31,9 +41,29 @@ module yayacemu (
 
 endmodule
 
+module keyboard (
+    input wire clk_in,
+    output bit keyboard [15:0]
+    );
+    int i;
+    import "DPI-C" function bit [7:0] get_key();
+    bit[7:0] keyval;
+    always_ff @(posedge clk_in) begin
+        keyval = get_key();
+        if (keyval != 8'b11111111) begin
+           keyboard[keyval[3:0]] = keyval[7]; 
+        end
+        $display("%b", keyval);
+        for (i = 0; i < 16; i++) begin
+            $display("%0d %b", i, keyboard[i]);
+        end
+    end
+endmodule
+
 module chip8_cpu(
     output bit [7:0] memory [0:4095],
     input wire clk_in,
+    input wire keyboard [15:0],
     output wire [31:0] vram [0:2047],
     output wire [15:0] stack [0:15],
     output wire [15:0] index_reg,
@@ -42,7 +72,9 @@ module chip8_cpu(
     output logic [7:0] delay_timer,
     output logic [7:0] sound_timer,
     output int cycle_counter,
-    output wire [15:0] program_counter 
+    output wire [15:0] program_counter,
+    output bit halt,
+    output int watch_key
     );
 
     logic [15:0] opcode;
@@ -70,7 +102,7 @@ module chip8_cpu(
         $display("HW     : PC %0d 0x%h", program_counter, program_counter);
 
         // 480Hz / 8 = 60 Hz
-        if (cycle_counter % 8 == 0) begin
+        if (cycle_counter % 20 == 0) begin
             if (delay_timer > 0)
                 delay_timer--;
             if (sound_timer > 0)
@@ -137,14 +169,17 @@ module chip8_cpu(
             'h8??1: begin
                 $display("HW     : INSTR OR Vx, Vy");
                 registers[(opcode & 'h0F00) >> 8] |= registers[(opcode & 'h00F0) >> 4];
+                registers[15] = 0;
             end
             'h8??2: begin
                 $display("HW     : INSTR AND Vx, Vy");
                 registers[(opcode & 'h0F00) >> 8] &= registers[(opcode & 'h00F0) >> 4];
+                registers[15] = 0;
             end
             'h8??3: begin
                 $display("HW     : INSTR XOR Vx, Vy");
                 registers[(opcode & 'h0F00) >> 8] ^= registers[(opcode & 'h00F0) >> 4];
+                registers[15] = 0;
             end
             'h8??4: begin
                 $display("HW     : INSTR ADD Vx, Vy");
@@ -200,6 +235,10 @@ module chip8_cpu(
                 registers[(opcode & 'h0F00) >> 8] = scratch[7:0] & scratch2[7:0];
             end
             'hD???: begin
+                if (cycle_counter % 20 != 0) begin
+                    halt = 1;
+                end else begin
+                    halt = 0;
                 $display("HW     : INSTR DRW Vx, Vy, nibble");
                 x_cord = {24'h000000, registers[(opcode & 'h0F00) >> 8]};
                 y_cord = {24'h000000, registers[(opcode & 'h00F0) >> 4]};
@@ -213,9 +252,11 @@ module chip8_cpu(
 
                 for (r = 0; r < size; r++) begin 
                     for ( c = 0; c < 8; c++) begin 
+                        if (r + y_cord >= 32 || x_cord + c >= 64)
+                            continue;
                         screen_pixel = vram[((r + y_cord) * 64) + (x_cord + c)];
                         sprite_pixel = memory[{16'h0000, index_reg} + r] & ('h80 >> c);
-
+        
                         if (|sprite_pixel) begin 
                            if (screen_pixel == 32'hFFFFFFFF) begin 
                                 registers[15] = 1;
@@ -225,9 +266,38 @@ module chip8_cpu(
                   end 
                 end
             end
+            end
+            'hE?9E: begin
+                $display("HW     : INSTR SKP Vx");
+                if (keyboard[{registers[(opcode & 'h0F00) >> 8]}[3:0]] == 1) begin
+                    program_counter += 2;
+                end
+            end
+            'hE?A1: begin
+                $display("HW     : INSTR SNE Vx");
+                if (keyboard[{registers[(opcode & 'h0F00) >> 8]}[3:0]] != 1) begin
+                    program_counter += 2;
+                end
+            end
             'hF?07: begin
                 $display("HW     : INSTR LD Vx, DT");
                 registers[(opcode & 'h0F00) >> 8] = delay_timer;
+            end
+            'hF?0A: begin
+                $display("HW     : INSTR LD Vx, K");
+                halt = 1;
+                for(i = 0; i < 16; i++) begin
+                    if (watch_key == 255) begin
+                        if (keyboard[i]) begin
+                           watch_key = i; 
+                        end
+                    end else begin
+                        if (!keyboard[watch_key]) begin
+                            halt = 0;
+                            watch_key = 255;
+                        end
+                    end
+                end
             end
             'hF?15: begin
                 $display("HW     : INSTR LD DT, Vx");
@@ -273,8 +343,8 @@ module chip8_cpu(
             end
             default: $display("HW     : ILLEGAL INSTRUCTION");
         endcase
-        
-        program_counter += 2;
+        if (!halt) 
+            program_counter += 2;
         cycle_counter++;
     end
 endmodule
