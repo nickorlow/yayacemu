@@ -1,4 +1,4 @@
-# Yet Another Yet Another Chip-8 Emulator (yayacemu)
+# Yet another yet another Chip-8 emulator (yayacemu)
 
 [Because one just wasn't enough](https://github.com/nickorlow/yacemu). 
 
