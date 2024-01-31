@@ -16,13 +16,15 @@ module yayacemu (
     int watch_key;
 
     logic [15:0] index_reg;
+    bit [7:0] rand_num;
     logic rom_ready;
     logic [15:0] program_counter;
 
+    randomizer randy(clk_in, program_counter, keyboard, cycle_counter, rand_num);
     keyboard kb(clk_in, keyboard);
     rom_loader rl (memory, rom_ready);
-    chip8_cpu cpu (memory, clk_in, keyboard, vram, stack, index_reg, stack_pointer, registers, delay_timer, sound_timer, cycle_counter, program_counter, halt, watch_key);
-    chip8_gpu gpu (vram);
+    chip8_cpu cpu (memory, clk_in, keyboard, rand_num, vram, stack, index_reg, stack_pointer, registers, delay_timer, sound_timer, cycle_counter, program_counter, halt, watch_key);
+    chip8_gpu gpu (vram, sound_timer);
 
     int i;
     initial begin 
@@ -53,10 +55,6 @@ module keyboard (
         if (keyval != 8'b11111111) begin
            keyboard[keyval[3:0]] = keyval[7]; 
         end
-        $display("%b", keyval);
-        for (i = 0; i < 16; i++) begin
-            $display("%0d %b", i, keyboard[i]);
-        end
     end
 endmodule
 
@@ -64,6 +62,7 @@ module chip8_cpu(
     output bit [7:0] memory [0:4095],
     input wire clk_in,
     input wire keyboard [15:0],
+    input wire [7:0] random_number,
     output wire [31:0] vram [0:2047],
     output wire [15:0] stack [0:15],
     output wire [15:0] index_reg,
@@ -230,7 +229,7 @@ module chip8_cpu(
             'hc???: begin
                 $display("HW     : RND Vx, addr");
                 // TODO: use a real RNG module, this is not synthesizeable
-                scratch = {$urandom()%256}[15:0];
+                scratch = {8'h00, random_number} % 16'h0100;
                 scratch2 = (opcode & 'h00FF);
                 registers[(opcode & 'h0F00) >> 8] = scratch[7:0] & scratch2[7:0];
             end
@@ -349,11 +348,35 @@ module chip8_cpu(
     end
 endmodule
 
-module chip8_gpu (
-    input wire [31:0] vram [0:2047]
+// pseudo random number generator
+module randomizer (
+    input wire clk_in,
+    input wire [15:0] pc,
+    input bit keyboard [15:0],
+    input int cycle_counter,
+    output bit [7:0] rand_bit
     );
-    import "DPI-C" function void draw_screen(logic [31:0] vram [0:2047]);
+
+    bit [7:0] last;
+    int i;
+    
+    always_ff @(posedge clk_in) begin
+        for (i = 0; i < 8; i++) begin
+            rand_bit[i] ^= ~keyboard[i] ? cycle_counter[i] : cycle_counter[7-i];
+            rand_bit[i] ^= (cycle_counter % 7) == 0 ? pc[i] : ~pc[i];
+            rand_bit[i] ^= keyboard[i+7] ? ~last[i] : last[i];
+        end 
+        last = rand_bit;
+        $display("Randomizer is: %b", rand_bit);
+    end
+endmodule
+
+module chip8_gpu (
+    input wire [31:0] vram [0:2047],
+    input wire [7:0] sound_timer
+    );
+    import "DPI-C" function void draw_screen(logic [31:0] vram [0:2047], bit beep);
     always_comb begin
-       draw_screen(vram); 
+       draw_screen(vram, sound_timer > 0); 
     end
 endmodule

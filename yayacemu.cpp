@@ -14,7 +14,7 @@
 
 #define SCREEN_WIDTH 64
 #define SCREEN_HEIGHT 32
-#define EMULATION_HZ 4000
+#define EMULATION_HZ 2000
 
 FILE *rom_file;
 SDL_Window *window;
@@ -37,11 +37,15 @@ void init_screen() {
   printf("INF_EMU: Screen initialized\n");
 }
 
-void draw_screen(const svLogicVecVal* vram) {
+void draw_screen(const svLogicVecVal* vram, const svBit beep) {
   uint32_t *screen = (uint32_t*) malloc(SCREEN_WIDTH*SCREEN_HEIGHT*32);
   for(int i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT; i++) {
       screen[i] = vram[i].aval;
   }
+  if (beep > 0)
+      SDL_SetTextureColorMod(texture, 255, 0, 0);
+  else
+      SDL_SetTextureColorMod(texture, 255, 255, 255);
   SDL_UpdateTexture(texture, NULL, screen,
                         sizeof(screen[0]) * SCREEN_WIDTH);
   SDL_RenderClear(renderer);
@@ -147,10 +151,12 @@ int main(int argc, char** argv) {
         top->clk_in ^= 1;
         top->eval(); 
         usleep(1000000/EMULATION_HZ);
+        if (SDL_QuitRequested()) {
+          printf("Received Quit from SDL. Goodbye!\n");
+          break;
+        }
     }
-    printf("TB     : Testbench has reached end of simulation. Pausing for 10 seconds before exiting");
     fflush(stdout);
-    usleep(3000000);
     delete top;
     delete contextp;
     return 0;

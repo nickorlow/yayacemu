@@ -37,10 +37,10 @@ yayacemu [PATH_TO_YOUR_ROM]
 - [x] More Instructions
 - [x] Tetris Working Running
 - [x] Pass Quirks Test 
-- [ ] Add beeper (instead of sound, screen becomes red)
-- [ ] Implement a real random module 
+- [x] Add beeper (instead of sound, screen becomes red)
+- [x] Add all Instructions
+- [x] Implement a real (synthesizeable, pseudorandom) random module 
 - [ ] Code cleanup
-- [x] All Instructions
 
 ### Screenshots
 
@@ -50,3 +50,4 @@ yayacemu [PATH_TO_YOUR_ROM]
 ![Flag Test Demo](https://github.com/nickorlow/yayacemu/blob/main/screenshots/flags.png?raw=true)
 ![Quirk Test Demo](https://github.com/nickorlow/yayacemu/blob/main/screenshots/quirks.png?raw=true)
 ![Tetris Demo](https://github.com/nickorlow/yayacemu/blob/main/screenshots/tetris.png?raw=true)
+![Beeper Demo](https://github.com/nickorlow/yayacemu/blob/main/screenshots/beeper.png?raw=true)
