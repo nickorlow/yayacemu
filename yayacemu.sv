@@ -20,6 +20,8 @@ module yayacemu (
     logic rom_ready;
     logic [15:0] program_counter;
 
+    bit [7:0] fontset [79:0];
+
     randomizer randy(clk_in, program_counter, keyboard, cycle_counter, rand_num);
     keyboard kb(clk_in, keyboard);
     rom_loader rl (memory, rom_ready);
@@ -28,8 +30,29 @@ module yayacemu (
 
     int i;
     initial begin 
+        fontset = {
+            8'hF0, 8'h90, 8'h90, 8'h90, 8'hF0, // 0
+            8'h20, 8'h60, 8'h20, 8'h20, 8'h70, // 1
+            8'hF0, 8'h10, 8'hF0, 8'h80, 8'hF0, // 2
+            8'hF0, 8'h10, 8'hF0, 8'h10, 8'hF0, // 3
+            8'h90, 8'h90, 8'hF0, 8'h10, 8'h10, // 4
+            8'hF0, 8'h80, 8'hF0, 8'h10, 8'hF0, // 5
+            8'hF0, 8'h80, 8'hF0, 8'h90, 8'hF0, // 6
+            8'hF0, 8'h10, 8'h20, 8'h40, 8'h40, // 7
+            8'hF0, 8'h90, 8'hF0, 8'h90, 8'hF0, // 8
+            8'hF0, 8'h90, 8'hF0, 8'h10, 8'hF0, // 9
+            8'hF0, 8'h90, 8'hF0, 8'h90, 8'h90, // A
+            8'hE0, 8'h90, 8'hE0, 8'h90, 8'hE0, // B
+            8'hF0, 8'h80, 8'h80, 8'h80, 8'hF0, // C
+            8'hE0, 8'h90, 8'h90, 8'h90, 8'hE0, // D
+            8'hF0, 8'h80, 8'hF0, 8'h80, 8'hF0, // E
+            8'hF0, 8'h80, 8'hF0, 8'h80, 8'h80  // F
+        };
         watch_key = 255;
         halt = 0;
+        for(i = 0; i < 80; i++) begin
+            memory[i] = fontset[i];
+        end
         for(i = 0; i < 15; i++) begin
             keyboard[i] = 0;
         end
@@ -309,6 +332,10 @@ module chip8_cpu(
             'hF?1E: begin
                 $display("HW     : INSTR ADD I, Vx");
                 index_reg = index_reg + {8'h00, registers[(opcode & 'h0F00) >> 8]};
+            end
+            'hF?29: begin
+                $display("HW     : INSTR LDL F, Vx");
+                index_reg = registers[(opcode & 'h0F00) >> 8] * 5;
             end
             'hF?33: begin
                $display("HW     : INSTR LD B, Vx"); 
