@@ -32,7 +32,7 @@ yayacemu [PATH_TO_YOUR_ROM]
 ### Todo
 - [x] Graphics
 - [x] Corax+ Required Instructions
-- [ ] Proper Flag Handling 
+- [x] Proper Flag Handling 
 - [ ] Working Input
 - [ ] More Instructions
 - [ ] Tetris Working Running
@@ -46,3 +46,4 @@ yayacemu [PATH_TO_YOUR_ROM]
 ![Chip 8 Logo Demo](https://github.com/nickorlow/yayacemu/blob/main/screenshots/chip8-logo.png?raw=true)
 ![IBM Logo Demo](https://github.com/nickorlow/yayacemu/blob/main/screenshots/ibm-logo.png?raw=true)
 ![CORAX+ Test Demo](https://github.com/nickorlow/yayacemu/blob/main/screenshots/corax.png?raw=true)
+![Flag Test Demo](https://github.com/nickorlow/yayacemu/blob/main/screenshots/flags.png?raw=true)

@@ -14,6 +14,7 @@
 
 #define SCREEN_WIDTH 64
 #define SCREEN_HEIGHT 32
+#define EMULATION_HZ 480
 
 FILE *rom_file;
 SDL_Window *window;
@@ -89,10 +90,10 @@ int main(int argc, char** argv) {
     contextp->commandArgs(argc, argv);
     Vyayacemu* top = new Vyayacemu{contextp};
     //while (!contextp->gotFinish()) {
-    for (int i = 0; i < 20000; i++) { 
+    for (int i = 0; i < 2000; i++) { 
         top->clk_in ^= 1;
         top->eval(); 
-        usleep(500);
+        usleep(1000000/EMULATION_HZ);
     }
     printf("TB     : Testbench has reached end of simulation. Pausing for 10 seconds before exiting");
     fflush(stdout);
