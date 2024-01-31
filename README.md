@@ -4,6 +4,8 @@
 
 A Chip-8 emulator (interpreter) written in SystemVerilog with I/O simulated with C++ also depends on SDL2.
 
+Note: Code quality is bad at the moment because I just wanted to get graphics working and didn't pay much attention to it. I will fix tomorrow.
+
 ### Building & Testing 
 
 In order to run yayacemu, you must have sdl2, verilator, and make installed.
@@ -34,7 +36,7 @@ yayacemu [PATH_TO_YOUR_ROM]
 - [ ] Working Input
 - [ ] More Instructions
 - [ ] Tetris Working Running
-- [ ] Pass Quirks Test (DispQuirk is a bit touchy) 
+- [ ] Pass Quirks Test 
 - [ ] Add beeper (instead of sound, screen becomes red)
 - [ ] Code cleanup
 - [ ] All Instructions
