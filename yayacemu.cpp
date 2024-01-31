@@ -89,16 +89,14 @@ int main(int argc, char** argv) {
     contextp->commandArgs(argc, argv);
     Vyayacemu* top = new Vyayacemu{contextp};
     //while (!contextp->gotFinish()) {
-    top->pc_out = 0;
-    while (top->pc_out < 100) { 
+    for (int i = 0; i < 20000; i++) { 
         top->clk_in ^= 1;
-        top->pc_in = top->pc_out;
         top->eval(); 
         usleep(500);
     }
     printf("TB     : Testbench has reached end of simulation. Pausing for 10 seconds before exiting");
     fflush(stdout);
-    usleep(10000000);
+    usleep(3000000);
     delete top;
     delete contextp;
     return 0;

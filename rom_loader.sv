@@ -14,10 +14,11 @@ module rom_loader (
         rom_size = load_rom();
         $display("HW     : ROM size is %0d bytes (%0d bits) (%0d instructions)", rom_size, rom_size * 8, rom_size / 2);
         for (i = 0; i < rom_size; i++) begin
-            memory[i] = get_next_instr();
+            memory['h200 + i] = get_next_instr();
         end
         close_rom();
         $display("HW     : ROM loaded successfully");
+        $finish;
         rom_ready = 1;
     end
 endmodule
