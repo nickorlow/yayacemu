@@ -37,15 +37,18 @@ void init_screen() {
   printf("INF_EMU: Screen initialized\n");
 }
 
-void draw_screen(const svLogicVecVal* vram, const svBit beep) {
-  uint32_t *screen = (uint32_t*) malloc(SCREEN_WIDTH*SCREEN_HEIGHT*32);
-  for(int i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT; i++) {
-      screen[i] = vram[i].aval;
-  }
+void set_beep(const svBit beep) {
   if (beep > 0)
       SDL_SetTextureColorMod(texture, 255, 0, 0);
   else
       SDL_SetTextureColorMod(texture, 255, 255, 255);
+}
+
+void draw_screen(const svLogicVecVal* vram) {
+  uint32_t *screen = (uint32_t*) malloc(SCREEN_WIDTH*SCREEN_HEIGHT*32);
+  for(int i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT; i++) {
+      screen[i] = vram[i].aval;
+  }
   SDL_UpdateTexture(texture, NULL, screen,
                         sizeof(screen[0]) * SCREEN_WIDTH);
   SDL_RenderClear(renderer);
