@@ -1,11 +1,9 @@
 #include "svdpi.h"
-#include "Vyayacemu__Dpi.h"
-#include <stdio.h>
+#include "Vchip8__Dpi.h"
+#include <iostream>
 #include <memory.h>
-
-#include "Vyayacemu.h"
+#include "Vchip8.h"
 #include "verilated.h"
-
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_quit.h>
@@ -34,11 +32,11 @@ void init_screen() {
   texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888,
                                            SDL_TEXTUREACCESS_STREAMING,
                                            SCREEN_WIDTH, SCREEN_HEIGHT);
-  printf("INF_EMU: Screen initialized\n");
+  std::cout << "INF_EMU: Screen initialized" << '\n';
 }
 
 void set_beep(const svBit beep) {
-  if (beep > 0)
+  if (beep == 1)
       SDL_SetTextureColorMod(texture, 255, 0, 0);
   else
       SDL_SetTextureColorMod(texture, 255, 255, 255);
@@ -49,28 +47,27 @@ void draw_screen(const svLogicVecVal* vram) {
   for(int i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT; i++) {
       screen[i] = vram[i].aval;
   }
-  SDL_UpdateTexture(texture, NULL, screen,
-                        sizeof(screen[0]) * SCREEN_WIDTH);
+  SDL_UpdateTexture(texture, NULL, screen, sizeof(screen[0]) * SCREEN_WIDTH);
   SDL_RenderClear(renderer);
   SDL_RenderCopy(renderer, texture, NULL, NULL);
   SDL_RenderPresent(renderer);
-  printf("INF_EMU: Drawing Frame\n");
+  free(screen);
+  std::cout << "INF_EMU: Drawing Frame" << '\n';
 }
 
 int load_rom() {
-  printf("INF_EMU: Loading ROM %s\n", rom_name);
-
+    std::cout << "INF_EMU: Loading ROM " << rom_name << '\n';
   rom_file = fopen(rom_name, "r");
 
   if (rom_file == NULL) {
-    printf("INF_EMU: Error reading ROM file. Panicing.\n");
+      std::cout << "INF_EMU: Error reading ROM file. Panicing." << '\n';
     exit(1); 
   }
 
   fseek(rom_file, 0L, SEEK_END);
   int rom_size = ftell(rom_file);
   fseek(rom_file, 0L, SEEK_SET);
-  printf("INF_EMU: ROM size is %d bytes\n", rom_size);
+  std::cout << "INF_EMU: ROM size is %d bytes " << rom_size << '\n';
 
   return rom_size;
 }
@@ -83,13 +80,10 @@ void close_rom() {
     fclose(rom_file);
 }
 
-int get_num() {
-    return 1;
-}
-
 svBitVecVal get_key() {
     SDL_Event event;
     uint8_t down = 0;
+
     while(SDL_PollEvent(&event)) {
         switch(event.type) {
             case SDL_KEYDOWN:
@@ -142,25 +136,29 @@ svBitVecVal get_key() {
 
 int main(int argc, char** argv) {
     if (argc < 2) {
-        printf("Use: yayacemu [ROM_NAME]");
+        std::cout << "Use: yayacemu [ROM_NAME]" << '\n';
         exit(1);
     }
+
     rom_name = argv[1];
+
     VerilatedContext* contextp = new VerilatedContext;
     contextp->commandArgs(argc, argv);
-    Vyayacemu* top = new Vyayacemu{contextp};
-    //while (!contextp->gotFinish()) {
-    for (int i = 0; ; i++) { 
-        top->clk_in ^= 1;
-        top->eval(); 
+
+    Vchip8* dut = new Vchip8{contextp};
+
+    while (true) { 
+        dut->clk_in ^= 1;
+        dut->eval(); 
         usleep(1000000/EMULATION_HZ);
         if (SDL_QuitRequested()) {
-          printf("Received Quit from SDL. Goodbye!\n");
+          std::cout << "INF_EMU: Received Quit from SDL. Goodbye!" << '\n';
           break;
         }
     }
+
     fflush(stdout);
-    delete top;
+    delete dut;
     delete contextp;
     return 0;
 }
