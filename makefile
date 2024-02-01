@@ -1,3 +1,5 @@
+.PHONY: run clean format
+
 SDL_CFLAGS = `sdl2-config --cflags`
 SDL_LDFLAGS = `sdl2-config --libs`
 
@@ -12,5 +14,9 @@ run: build
 
 clean:
 	rm -rf obj_dir
+
+format:
+	verible-verilog-format *.sv --inplace && clang-format *.cpp -i
+
 
 
