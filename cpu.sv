@@ -1,4 +1,5 @@
 module cpu (
+    input wire rst_in,
     output bit [7:0] memory[0:4095],
     input wire clk_in,
     input wire keyboard[15:0],
@@ -31,18 +32,16 @@ module cpu (
   logic [31:0] screen_pixel;
   logic [7:0] sprite_pixel;
 
-  // Initialize CPU
-  initial begin
-    halt = 0;
-    watch_key = 255;
-    sound_timer = 0;
-    delay_timer = 0;
-    cycle_counter = 0;
-    program_counter = 'h200;
-    stack_pointer = 4'b0000;
-  end
-
   always_ff @(posedge clk_in) begin
+    if (rst_in) begin
+        halt = 0;
+        watch_key = 255;
+        sound_timer = 0;
+        delay_timer = 0;
+        cycle_counter = 0;
+        program_counter = 'h200;
+        stack_pointer = 4'b0000;
+    end
     opcode = {memory[program_counter+0], memory[program_counter+1]};
     $display("HW     : opcode is 0x%h (%b)", opcode, opcode);
     $display("HW     : PC %0d 0x%h", program_counter, program_counter);

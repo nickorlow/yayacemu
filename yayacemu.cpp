@@ -141,9 +141,11 @@ int main(int argc, char **argv) {
 
   Vchip8 *dut = new Vchip8{contextp};
 
+  dut->rst_in = 1;
   while (true) {
     dut->clk_in ^= 1;
     dut->eval();
+    dut->rst_in = 0;
     usleep(1000000 / EMULATION_HZ);
     if (SDL_QuitRequested()) {
       std::cout << "INF_EMU: Received Quit from SDL. Goodbye!" << '\n';
