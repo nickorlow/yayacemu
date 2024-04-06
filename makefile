@@ -17,6 +17,3 @@ clean:
 
 format:
 	verible-verilog-format *.sv --inplace && clang-format *.cpp -i
-
-
-

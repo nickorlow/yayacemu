@@ -41,10 +41,10 @@ void set_beep(const svBit beep) {
     SDL_SetTextureColorMod(texture, 255, 255, 255);
 }
 
-void draw_screen(const svLogicVecVal *vram) {
+void draw_screen(const svLogic *vram) {
   uint32_t *screen = (uint32_t *)malloc(SCREEN_WIDTH * SCREEN_HEIGHT * 32);
   for (int i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT; i++) {
-    screen[i] = vram[i].aval;
+    screen[i] = vram[i] == 1 ? 0xFFFFFFFF : 0x00000000;
   }
   SDL_UpdateTexture(texture, NULL, screen, sizeof(screen[0]) * SCREEN_WIDTH);
   SDL_RenderClear(renderer);

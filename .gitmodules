@@ -1,0 +1,3 @@
+[submodule "the-bomb"]
+	path = the-bomb
+	url = git@github.com:nickorlow/the-bomb.git

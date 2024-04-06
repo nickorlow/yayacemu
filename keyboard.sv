@@ -5,7 +5,7 @@ module keyboard (
 
   import "DPI-C" function bit [7:0] get_key();
 
-  always_ff @(posedge clk_in) begin
+  always_ff @(negedge clk_in) begin
     bit [7:0] keyval = get_key();
     if (&keyval != 1) begin
       keyboard[keyval[3:0]] = keyval[7];

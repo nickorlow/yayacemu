@@ -1,12 +1,12 @@
 module cpu (
-    input wire rst_in,
+    input wire system_ready,
     output bit [7:0] memory[0:4095],
     input wire clk_in,
     input wire keyboard[15:0],
     input wire [7:0] random_number,
     output int cycle_counter,
     output wire [15:0] program_counter,
-    output wire [31:0] vram[0:2047],
+    output wire vram[0:2047],
     output wire [7:0] sound_timer
 );
 
@@ -29,19 +29,11 @@ module cpu (
   logic [31:0] x_cord;
   logic [31:0] y_cord;
   logic [7:0] size;
-  logic [31:0] screen_pixel;
+  logic screen_pixel;
   logic [7:0] sprite_pixel;
 
-  always_ff @(posedge clk_in) begin
-    if (rst_in) begin
-        halt = 0;
-        watch_key = 255;
-        sound_timer = 0;
-        delay_timer = 0;
-        cycle_counter = 0;
-        program_counter = 'h200;
-        stack_pointer = 4'b0000;
-    end
+  always_ff @(negedge clk_in) begin
+    if (system_ready) begin
     opcode = {memory[program_counter+0], memory[program_counter+1]};
     $display("HW     : opcode is 0x%h (%b)", opcode, opcode);
     $display("HW     : PC %0d 0x%h", program_counter, program_counter);
@@ -199,10 +191,10 @@ module cpu (
               sprite_pixel = memory[{16'h0000, index_reg}+r] & ('h80 >> c);
 
               if (|sprite_pixel) begin
-                if (screen_pixel == 32'hFFFFFFFF) begin
+                if (screen_pixel == 1) begin
                   registers[15] = 1;
                 end
-                vram[((r+y_cord)*64)+(x_cord+c)] ^= 32'hFFFFFFFF;
+                vram[((r+y_cord)*64)+(x_cord+c)] ^= 1;
               end
             end
           end
@@ -294,5 +286,6 @@ module cpu (
     if (!halt) program_counter += 2;
 
     cycle_counter++;
+end
   end
 endmodule

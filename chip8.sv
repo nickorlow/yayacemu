@@ -3,7 +3,7 @@ module chip8 (
     input wire rst_in
 );
 
-  bit [31:0] vram[0:2047];
+  bit vram[0:2047];
   bit [7:0] memory[0:4095];
 
   bit keyboard[15:0];
@@ -12,12 +12,18 @@ module chip8 (
   bit [15:0] program_counter;
   int cycle_counter;
 
+  bit rom_ready;
+  bit font_ready;
+  bit system_ready;
+  bit halt;
+
   bit [7:0] random_number;
 
+  and(system_ready, rom_ready, font_ready);
 
   beeper beeper (sound_timer);
   cpu cpu (
-      rst_in,
+      system_ready,
       memory,
       clk_in,
       keyboard,
@@ -25,7 +31,7 @@ module chip8 (
       cycle_counter,
       program_counter,
       vram,
-      sound_timer
+      sound_timer 
   );
   gpu gpu (vram);
   keyboard kb (
@@ -39,10 +45,10 @@ module chip8 (
       cycle_counter,
       random_number
   );
-  rom_loader loader (memory);
+  rom_loader loader (clk_in, rst_in, memory, rom_ready);
 
-  always_ff @(posedge clk_in) begin
-    if (rst_in) begin
+  always_ff @(negedge clk_in) begin
+    if (~font_ready) begin
         bit [7:0] fontset[79:0] = {
           8'hF0,
           8'h90,
@@ -130,11 +136,8 @@ module chip8 (
         for (int i = 0; i < 80; i++) begin
           memory[i] = fontset[79-i];
         end
-    
-        // Initialize keyboard bits
-        for (int i = 0; i < 15; i++) begin
-          keyboard[i] = 0;
-        end
+
+        font_ready = 1;
     end
   end
 endmodule
