@@ -10,8 +10,8 @@
 #include <iostream>
 #include <memory.h>
 
-#define SCREEN_WIDTH 64
-#define SCREEN_HEIGHT 32
+#define SCREEN_WIDTH 128 
+#define SCREEN_HEIGHT 64 
 #define EMULATION_HZ 2000
 
 FILE *rom_file;
@@ -41,10 +41,14 @@ void set_beep(const svBit beep) {
     SDL_SetTextureColorMod(texture, 255, 255, 255);
 }
 
-void draw_screen(const svLogic *vram) {
+void draw_screen(const svLogicVecVal *vram) {
   uint32_t *screen = (uint32_t *)malloc(SCREEN_WIDTH * SCREEN_HEIGHT * 32);
-  for (int i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT; i++) {
-    screen[i] = vram[i] == 1 ? 0xFFFFFFFF : 0x00000000;
+  for (int i = 0; i < 1024; i++) {
+      uint8_t line_byte = (uint8_t) vram[i].aval;
+      for (int j = 0; j < 8; j++) {
+            uint8_t pixel_val = (line_byte >> (7-j)) & 1;
+            screen[(i*8) + j] = pixel_val == 1 ? 0xFFFFFFFF : 0x00000000;
+      }
   }
   SDL_UpdateTexture(texture, NULL, screen, sizeof(screen[0]) * SCREEN_WIDTH);
   SDL_RenderClear(renderer);

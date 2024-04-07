@@ -6,7 +6,7 @@ module cpu (
     input wire [7:0] random_number,
     output int cycle_counter,
     output wire [15:0] program_counter,
-    output wire vram[0:2047],
+    output wire [7:0] vram[0:1023],
     output wire [7:0] sound_timer
 );
 
@@ -31,6 +31,36 @@ module cpu (
   logic [7:0] size;
   logic screen_pixel;
   logic [7:0] sprite_pixel;
+  
+  task write_pixels;
+    input [31:0] x;
+    input [31:0] y;
+
+    int i;
+     
+     begin
+         // bottom left
+         i = (y*128*2) + x*2 +127;
+
+         if (vram[i/8][7-(i%8)] == 1) begin
+           registers[15] = 1;
+         end
+
+         vram[i/8][7-(i%8)] ^= 1;      
+
+         // bottom right
+         i = (y*128*2) + x*2 +128;
+         vram[i/8][7-(i%8)] ^= 1;      
+
+         // top left
+         i = (y*128*2) + x*2-1;
+         vram[i/8][7-(i%8)] ^= 1;      
+
+         // top right
+         i = (y*128*2) + x*2;
+         vram[i/8][7-(i%8)] ^= 1;      
+     end
+  endtask
 
   always_ff @(negedge clk_in) begin
     if (system_ready) begin
@@ -187,14 +217,10 @@ module cpu (
           for (int r = 0; r < size; r++) begin
             for (int c = 0; c < 8; c++) begin
               if (r + y_cord >= 32 || x_cord + c >= 64) continue;
-              screen_pixel = vram[((r+y_cord)*64)+(x_cord+c)];
               sprite_pixel = memory[{16'h0000, index_reg}+r] & ('h80 >> c);
 
               if (|sprite_pixel) begin
-                if (screen_pixel == 1) begin
-                  registers[15] = 1;
-                end
-                vram[((r+y_cord)*64)+(x_cord+c)] ^= 1;
+                  write_pixels(x_cord + c, r+y_cord);
               end
             end
           end

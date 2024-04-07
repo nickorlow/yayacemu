@@ -3,7 +3,7 @@ module chip8 (
     input wire rst_in
 );
 
-  bit vram[0:2047];
+  bit [7:0] vram[0:1023];
   bit [7:0] memory[0:4095];
 
   bit keyboard[15:0];
