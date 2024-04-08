@@ -1,0 +1,101 @@
+------------------------------------------------------------
+Timing Analyzer Summary
+------------------------------------------------------------
+
+Type  : Slow 1100mV 100C Model Setup 'cpu:cpu|st7920_serial_driver:gpu|lcd_clk'
+Slack : -28.406
+TNS   : -1742.530
+
+Type  : Slow 1100mV 100C Model Setup 'fpga_clk'
+Slack : -11.186
+TNS   : -95769.392
+
+Type  : Slow 1100mV 100C Model Hold 'fpga_clk'
+Slack : 0.429
+TNS   : 0.000
+
+Type  : Slow 1100mV 100C Model Hold 'cpu:cpu|st7920_serial_driver:gpu|lcd_clk'
+Slack : 0.476
+TNS   : 0.000
+
+Type  : Slow 1100mV 100C Model Minimum Pulse Width 'fpga_clk'
+Slack : -2.636
+TNS   : -8463.323
+
+Type  : Slow 1100mV 100C Model Minimum Pulse Width 'cpu:cpu|st7920_serial_driver:gpu|lcd_clk'
+Slack : -0.538
+TNS   : -185.389
+
+Type  : Slow 1100mV -40C Model Setup 'cpu:cpu|st7920_serial_driver:gpu|lcd_clk'
+Slack : -26.933
+TNS   : -1684.576
+
+Type  : Slow 1100mV -40C Model Setup 'fpga_clk'
+Slack : -11.228
+TNS   : -94100.779
+
+Type  : Slow 1100mV -40C Model Hold 'fpga_clk'
+Slack : 0.484
+TNS   : 0.000
+
+Type  : Slow 1100mV -40C Model Hold 'cpu:cpu|st7920_serial_driver:gpu|lcd_clk'
+Slack : 0.565
+TNS   : 0.000
+
+Type  : Slow 1100mV -40C Model Minimum Pulse Width 'fpga_clk'
+Slack : -2.636
+TNS   : -8927.522
+
+Type  : Slow 1100mV -40C Model Minimum Pulse Width 'cpu:cpu|st7920_serial_driver:gpu|lcd_clk'
+Slack : -0.538
+TNS   : -184.012
+
+Type  : Fast 1100mV 100C Model Setup 'cpu:cpu|st7920_serial_driver:gpu|lcd_clk'
+Slack : -14.774
+TNS   : -901.498
+
+Type  : Fast 1100mV 100C Model Setup 'fpga_clk'
+Slack : -6.214
+TNS   : -50560.530
+
+Type  : Fast 1100mV 100C Model Hold 'cpu:cpu|st7920_serial_driver:gpu|lcd_clk'
+Slack : 0.162
+TNS   : 0.000
+
+Type  : Fast 1100mV 100C Model Hold 'fpga_clk'
+Slack : 0.177
+TNS   : 0.000
+
+Type  : Fast 1100mV 100C Model Minimum Pulse Width 'fpga_clk'
+Slack : -2.174
+TNS   : -1371.543
+
+Type  : Fast 1100mV 100C Model Minimum Pulse Width 'cpu:cpu|st7920_serial_driver:gpu|lcd_clk'
+Slack : -0.192
+TNS   : -9.702
+
+Type  : Fast 1100mV -40C Model Setup 'cpu:cpu|st7920_serial_driver:gpu|lcd_clk'
+Slack : -12.462
+TNS   : -739.747
+
+Type  : Fast 1100mV -40C Model Setup 'fpga_clk'
+Slack : -4.930
+TNS   : -40871.978
+
+Type  : Fast 1100mV -40C Model Hold 'cpu:cpu|st7920_serial_driver:gpu|lcd_clk'
+Slack : 0.140
+TNS   : 0.000
+
+Type  : Fast 1100mV -40C Model Hold 'fpga_clk'
+Slack : 0.164
+TNS   : 0.000
+
+Type  : Fast 1100mV -40C Model Minimum Pulse Width 'fpga_clk'
+Slack : -2.174
+TNS   : -1373.239
+
+Type  : Fast 1100mV -40C Model Minimum Pulse Width 'cpu:cpu|st7920_serial_driver:gpu|lcd_clk'
+Slack : -0.137
+TNS   : -3.355
+
+------------------------------------------------------------
