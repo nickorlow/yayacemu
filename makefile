@@ -2,7 +2,7 @@
 
 SDL_CFLAGS = `sdl2-config --cflags`
 SDL_LDFLAGS = `sdl2-config --libs`
-SV_FILES=cpu.sv chip8.sv gpu.sv
+SV_FILES=aastructs.sv cpu.sv chip8.sv gpu.sv alu.sv
 
 lint:
 	verilator --lint-only -DDUMMY_GPU --timing ${SV_FILES} 
@@ -10,7 +10,7 @@ lint:
 build-rom:
 	python3 ./gen_rom.py ${ROM_FILE} rom.bin
 
-build: lint build-rom
+build: build-rom
 	verilator --cc --exe --build --timing -j 0 --top-module chip8 *.sv yayacemu.cpp -DDUMMY_GPU -CFLAGS "${SDL_CFLAGS}" -LDFLAGS "${SDL_LDFLAGS}" && clear
 
 run: build

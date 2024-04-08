@@ -1,3 +1,6 @@
+-v /work/structs.sv
+-v /work/astructs.sv
+-v /work/aastructs.sv
 +incdir+/work
 +incdir+/work/the-bomb
 +incdir+/work

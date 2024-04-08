@@ -1,3 +1,5 @@
+import structs::*;
+
 module cpu (
     input wire clk_in,
     input wire [7:0] rd_memory_data,
@@ -10,6 +12,20 @@ module cpu (
     output logic lcd_data,
     output logic [5:0] led
 );
+
+  logic alu_rst;
+  logic [7:0] alu_result;
+  logic alu_overflow;
+  logic alu_done;
+
+  alu alu (
+      alu_rst,
+      clk_in, 
+      instr.alu_i,
+      alu_result,
+      alu_overflow,
+      alu_done
+      );
 
   logic [7:0] vram [0:1023];
 
@@ -72,7 +88,7 @@ module cpu (
   
   typedef enum {INIT, DRAW} draw_stage;
   
-  typedef enum {CLS, LD, DRW, JP} cpu_opcode;
+  typedef enum {CLS, LD, DRW, JP, ALU} cpu_opcode;
   typedef enum {REG, IDX_REG, BYTE, MEM, SPRITE_MEM} data_type;
 
   struct {
@@ -91,7 +107,9 @@ module cpu (
 
       logic [3:0] dst_reg;
       logic [3:0] src_reg;
-      
+
+      alu_input alu_i; 
+
       logic [11:0] src_byte;
 
       logic [(8*16)-1:0] src_sprite;
@@ -112,6 +130,7 @@ module cpu (
     cycle_counter = 0;
     program_counter = 'h200;
     wr_go = 0;
+    alu_rst = 1;
     for (int i = 0; i < 1024; i++) begin
         vram[i] = 0;
     end
@@ -162,6 +181,20 @@ module cpu (
                    instr.dst_reg <= opcode[11:8];
 
                    state <= ST_EXEC;
+                end
+                16'h7???: begin
+                    instr.op <= ALU;
+
+                    instr.src <= BYTE;
+
+                    instr.dst <= REG;
+                    instr.dst_reg <= opcode[11:8];
+
+                    instr.alu_i.op <= structs::ADD;
+                    instr.alu_i.operand_a <= opcode[7:0];
+                    instr.alu_i.operand_b <= registers[opcode[11:8]];
+
+                    state <= ST_EXEC;
                 end
                 16'hA???: begin
                    $display("Instruction is LD I, Byte"); 
@@ -274,6 +307,16 @@ module cpu (
                    program_counter <= {4'h00, instr.src_byte}; 
                    state <= ST_CLEANUP;
                 end
+                ALU: begin
+                    alu_rst <= 0;
+                    if (alu_done) begin
+                        instr.src <= BYTE;
+                        instr.src_byte <= alu_result;
+                        registers[15] <= alu_overflow;
+                        state <= ST_WB;
+                        program_counter <= program_counter + 2;
+                    end
+                end
             endcase
 
             case (instr.op) 
@@ -309,6 +352,7 @@ module cpu (
         ST_CLEANUP: begin
            wr_go <= 0; 
            state <= ST_FETCH_HI;
+           alu_rst <= 1;
         end
     endcase
 
