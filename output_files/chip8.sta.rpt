@@ -1,5 +1,5 @@
 Timing Analyzer report for chip8
-Sun Apr  7 23:52:43 2024
+Mon Apr  8 08:52:45 2024
 Quartus Prime Version 23.1std.0 Build 991 11/28/2023 SC Lite Edition
 
 
@@ -98,22 +98,22 @@ https://fpgasoftware.intel.com/eula.
 ; Number detected on machine ; 12          ;
 ; Maximum allowed            ; 12          ;
 ;                            ;             ;
-; Average used               ; 5.73        ;
+; Average used               ; 5.48        ;
 ; Maximum used               ; 12          ;
 ;                            ;             ;
 ; Usage by Processor         ; % Time Used ;
 ;     Processor 1            ; 100.0%      ;
-;     Processor 2            ;  60.4%      ;
-;     Processor 3            ;  57.0%      ;
-;     Processor 4            ;  55.9%      ;
-;     Processor 5            ;  37.5%      ;
-;     Processor 6            ;  37.5%      ;
-;     Processor 7            ;  37.5%      ;
-;     Processor 8            ;  37.5%      ;
-;     Processor 9            ;  37.5%      ;
-;     Processor 10           ;  37.5%      ;
-;     Processor 11           ;  37.5%      ;
-;     Processor 12           ;  37.5%      ;
+;     Processor 2            ;  56.2%      ;
+;     Processor 3            ;  54.6%      ;
+;     Processor 4            ;  54.0%      ;
+;     Processor 5            ;  35.4%      ;
+;     Processor 6            ;  35.4%      ;
+;     Processor 7            ;  35.4%      ;
+;     Processor 8            ;  35.4%      ;
+;     Processor 9            ;  35.4%      ;
+;     Processor 10           ;  35.4%      ;
+;     Processor 11           ;  35.4%      ;
+;     Processor 12           ;  35.4%      ;
 +----------------------------+-------------+
 
 
@@ -123,18 +123,20 @@ https://fpgasoftware.intel.com/eula.
 ; Clock Name                               ; Type ; Period ; Frequency  ; Rise  ; Fall  ; Duty Cycle ; Divide by ; Multiply by ; Phase ; Offset ; Edge List ; Edge Shift ; Inverted ; Master ; Source ; Targets                                      ;
 +------------------------------------------+------+--------+------------+-------+-------+------------+-----------+-------------+-------+--------+-----------+------------+----------+--------+--------+----------------------------------------------+
 ; cpu:cpu|st7920_serial_driver:gpu|lcd_clk ; Base ; 1.000  ; 1000.0 MHz ; 0.000 ; 0.500 ;            ;           ;             ;       ;        ;           ;            ;          ;        ;        ; { cpu:cpu|st7920_serial_driver:gpu|lcd_clk } ;
+; downclocker:dc|clk_out                   ; Base ; 1.000  ; 1000.0 MHz ; 0.000 ; 0.500 ;            ;           ;             ;       ;        ;           ;            ;          ;        ;        ; { downclocker:dc|clk_out }                   ;
 ; fpga_clk                                 ; Base ; 1.000  ; 1000.0 MHz ; 0.000 ; 0.500 ;            ;           ;             ;       ;        ;           ;            ;          ;        ;        ; { fpga_clk }                                 ;
 +------------------------------------------+------+--------+------------+-------+-------+------------+-----------+-------------+-------+--------+-----------+------------+----------+--------+--------+----------------------------------------------+
 
 
-+-------------------------------------------------------------------------------+
-; Slow 1100mV 100C Model Fmax Summary                                           ;
-+-----------+-----------------+------------------------------------------+------+
-; Fmax      ; Restricted Fmax ; Clock Name                               ; Note ;
-+-----------+-----------------+------------------------------------------+------+
-; 34.01 MHz ; 34.01 MHz       ; cpu:cpu|st7920_serial_driver:gpu|lcd_clk ;      ;
-; 82.06 MHz ; 82.06 MHz       ; fpga_clk                                 ;      ;
-+-----------+-----------------+------------------------------------------+------+
++--------------------------------------------------------------------------------+
+; Slow 1100mV 100C Model Fmax Summary                                            ;
++------------+-----------------+------------------------------------------+------+
+; Fmax       ; Restricted Fmax ; Clock Name                               ; Note ;
++------------+-----------------+------------------------------------------+------+
+; 31.39 MHz  ; 31.39 MHz       ; cpu:cpu|st7920_serial_driver:gpu|lcd_clk ;      ;
+; 82.93 MHz  ; 82.93 MHz       ; downclocker:dc|clk_out                   ;      ;
+; 189.18 MHz ; 189.18 MHz      ; fpga_clk                                 ;      ;
++------------+-----------------+------------------------------------------+------+
 This panel reports FMAX for every clock in the design, regardless of the user-specified clock periods.  FMAX is only computed for paths where the source and destination registers or ports are driven by the same clock.  Paths of different clocks, including generated clocks, are ignored.  For paths between a clock and its inversion, FMAX is computed as if the rising and falling edges are scaled along with FMAX, such that the duty cycle (in terms of a percentage) is maintained. Altera recommends that you always use clock constraints and other slack reports for sign-off analysis.
 
 
@@ -149,8 +151,9 @@ HTML report is unavailable in plain text report export.
 +------------------------------------------+---------+---------------+
 ; Clock                                    ; Slack   ; End Point TNS ;
 +------------------------------------------+---------+---------------+
-; cpu:cpu|st7920_serial_driver:gpu|lcd_clk ; -28.406 ; -1742.530     ;
-; fpga_clk                                 ; -11.186 ; -95769.392    ;
+; cpu:cpu|st7920_serial_driver:gpu|lcd_clk ; -31.412 ; -1884.356     ;
+; downclocker:dc|clk_out                   ; -11.058 ; -87363.415    ;
+; fpga_clk                                 ; -4.953  ; -27.713       ;
 +------------------------------------------+---------+---------------+
 
 
@@ -159,8 +162,9 @@ HTML report is unavailable in plain text report export.
 +------------------------------------------+-------+---------------+
 ; Clock                                    ; Slack ; End Point TNS ;
 +------------------------------------------+-------+---------------+
-; fpga_clk                                 ; 0.429 ; 0.000         ;
-; cpu:cpu|st7920_serial_driver:gpu|lcd_clk ; 0.476 ; 0.000         ;
+; downclocker:dc|clk_out                   ; 0.429 ; 0.000         ;
+; cpu:cpu|st7920_serial_driver:gpu|lcd_clk ; 0.501 ; 0.000         ;
+; fpga_clk                                 ; 0.814 ; 0.000         ;
 +------------------------------------------+-------+---------------+
 
 
@@ -181,8 +185,9 @@ No paths to report.
 +------------------------------------------+--------+---------------+
 ; Clock                                    ; Slack  ; End Point TNS ;
 +------------------------------------------+--------+---------------+
-; fpga_clk                                 ; -2.636 ; -8463.323     ;
-; cpu:cpu|st7920_serial_driver:gpu|lcd_clk ; -0.538 ; -185.389      ;
+; downclocker:dc|clk_out                   ; -2.636 ; -8430.055     ;
+; fpga_clk                                 ; -0.622 ; -17.105       ;
+; cpu:cpu|st7920_serial_driver:gpu|lcd_clk ; -0.538 ; -172.550      ;
 +------------------------------------------+--------+---------------+
 
 
@@ -193,14 +198,15 @@ Design MTBF is not calculated because the design doesn't meet its timing require
 
 
 
-+-------------------------------------------------------------------------------+
-; Slow 1100mV -40C Model Fmax Summary                                           ;
-+-----------+-----------------+------------------------------------------+------+
-; Fmax      ; Restricted Fmax ; Clock Name                               ; Note ;
-+-----------+-----------------+------------------------------------------+------+
-; 35.8 MHz  ; 35.8 MHz        ; cpu:cpu|st7920_serial_driver:gpu|lcd_clk ;      ;
-; 81.78 MHz ; 81.78 MHz       ; fpga_clk                                 ;      ;
-+-----------+-----------------+------------------------------------------+------+
++--------------------------------------------------------------------------------+
+; Slow 1100mV -40C Model Fmax Summary                                            ;
++------------+-----------------+------------------------------------------+------+
+; Fmax       ; Restricted Fmax ; Clock Name                               ; Note ;
++------------+-----------------+------------------------------------------+------+
+; 33.23 MHz  ; 33.23 MHz       ; cpu:cpu|st7920_serial_driver:gpu|lcd_clk ;      ;
+; 82.94 MHz  ; 82.94 MHz       ; downclocker:dc|clk_out                   ;      ;
+; 185.36 MHz ; 185.36 MHz      ; fpga_clk                                 ;      ;
++------------+-----------------+------------------------------------------+------+
 This panel reports FMAX for every clock in the design, regardless of the user-specified clock periods.  FMAX is only computed for paths where the source and destination registers or ports are driven by the same clock.  Paths of different clocks, including generated clocks, are ignored.  For paths between a clock and its inversion, FMAX is computed as if the rising and falling edges are scaled along with FMAX, such that the duty cycle (in terms of a percentage) is maintained. Altera recommends that you always use clock constraints and other slack reports for sign-off analysis.
 
 
@@ -209,8 +215,9 @@ This panel reports FMAX for every clock in the design, regardless of the user-sp
 +------------------------------------------+---------+---------------+
 ; Clock                                    ; Slack   ; End Point TNS ;
 +------------------------------------------+---------+---------------+
-; cpu:cpu|st7920_serial_driver:gpu|lcd_clk ; -26.933 ; -1684.576     ;
-; fpga_clk                                 ; -11.228 ; -94100.779    ;
+; cpu:cpu|st7920_serial_driver:gpu|lcd_clk ; -29.494 ; -1798.010     ;
+; downclocker:dc|clk_out                   ; -11.057 ; -87142.095    ;
+; fpga_clk                                 ; -4.658  ; -29.299       ;
 +------------------------------------------+---------+---------------+
 
 
@@ -219,8 +226,9 @@ This panel reports FMAX for every clock in the design, regardless of the user-sp
 +------------------------------------------+-------+---------------+
 ; Clock                                    ; Slack ; End Point TNS ;
 +------------------------------------------+-------+---------------+
-; fpga_clk                                 ; 0.484 ; 0.000         ;
-; cpu:cpu|st7920_serial_driver:gpu|lcd_clk ; 0.565 ; 0.000         ;
+; downclocker:dc|clk_out                   ; 0.483 ; 0.000         ;
+; cpu:cpu|st7920_serial_driver:gpu|lcd_clk ; 0.546 ; 0.000         ;
+; fpga_clk                                 ; 0.786 ; 0.000         ;
 +------------------------------------------+-------+---------------+
 
 
@@ -241,8 +249,9 @@ No paths to report.
 +------------------------------------------+--------+---------------+
 ; Clock                                    ; Slack  ; End Point TNS ;
 +------------------------------------------+--------+---------------+
-; fpga_clk                                 ; -2.636 ; -8927.522     ;
-; cpu:cpu|st7920_serial_driver:gpu|lcd_clk ; -0.538 ; -184.012      ;
+; downclocker:dc|clk_out                   ; -2.636 ; -8301.987     ;
+; fpga_clk                                 ; -0.627 ; -18.184       ;
+; cpu:cpu|st7920_serial_driver:gpu|lcd_clk ; -0.538 ; -170.070      ;
 +------------------------------------------+--------+---------------+
 
 
@@ -258,8 +267,9 @@ Design MTBF is not calculated because the design doesn't meet its timing require
 +------------------------------------------+---------+---------------+
 ; Clock                                    ; Slack   ; End Point TNS ;
 +------------------------------------------+---------+---------------+
-; cpu:cpu|st7920_serial_driver:gpu|lcd_clk ; -14.774 ; -901.498      ;
-; fpga_clk                                 ; -6.214  ; -50560.530    ;
+; cpu:cpu|st7920_serial_driver:gpu|lcd_clk ; -16.301 ; -1018.017     ;
+; downclocker:dc|clk_out                   ; -5.608  ; -44394.911    ;
+; fpga_clk                                 ; -3.718  ; -8.178        ;
 +------------------------------------------+---------+---------------+
 
 
@@ -268,8 +278,9 @@ Design MTBF is not calculated because the design doesn't meet its timing require
 +------------------------------------------+-------+---------------+
 ; Clock                                    ; Slack ; End Point TNS ;
 +------------------------------------------+-------+---------------+
-; cpu:cpu|st7920_serial_driver:gpu|lcd_clk ; 0.162 ; 0.000         ;
-; fpga_clk                                 ; 0.177 ; 0.000         ;
+; cpu:cpu|st7920_serial_driver:gpu|lcd_clk ; 0.160 ; 0.000         ;
+; downclocker:dc|clk_out                   ; 0.177 ; 0.000         ;
+; fpga_clk                                 ; 0.303 ; 0.000         ;
 +------------------------------------------+-------+---------------+
 
 
@@ -290,8 +301,9 @@ No paths to report.
 +------------------------------------------+--------+---------------+
 ; Clock                                    ; Slack  ; End Point TNS ;
 +------------------------------------------+--------+---------------+
-; fpga_clk                                 ; -2.174 ; -1371.543     ;
-; cpu:cpu|st7920_serial_driver:gpu|lcd_clk ; -0.192 ; -9.702        ;
+; downclocker:dc|clk_out                   ; -2.174 ; -537.344      ;
+; fpga_clk                                 ; -0.517 ; -2.901        ;
+; cpu:cpu|st7920_serial_driver:gpu|lcd_clk ; -0.144 ; -6.507        ;
 +------------------------------------------+--------+---------------+
 
 
@@ -307,8 +319,9 @@ Design MTBF is not calculated because the design doesn't meet its timing require
 +------------------------------------------+---------+---------------+
 ; Clock                                    ; Slack   ; End Point TNS ;
 +------------------------------------------+---------+---------------+
-; cpu:cpu|st7920_serial_driver:gpu|lcd_clk ; -12.462 ; -739.747      ;
-; fpga_clk                                 ; -4.930  ; -40871.978    ;
+; cpu:cpu|st7920_serial_driver:gpu|lcd_clk ; -14.004 ; -820.600      ;
+; downclocker:dc|clk_out                   ; -4.541  ; -36337.093    ;
+; fpga_clk                                 ; -2.859  ; -5.427        ;
 +------------------------------------------+---------+---------------+
 
 
@@ -317,8 +330,9 @@ Design MTBF is not calculated because the design doesn't meet its timing require
 +------------------------------------------+-------+---------------+
 ; Clock                                    ; Slack ; End Point TNS ;
 +------------------------------------------+-------+---------------+
-; cpu:cpu|st7920_serial_driver:gpu|lcd_clk ; 0.140 ; 0.000         ;
-; fpga_clk                                 ; 0.164 ; 0.000         ;
+; cpu:cpu|st7920_serial_driver:gpu|lcd_clk ; 0.138 ; 0.000         ;
+; downclocker:dc|clk_out                   ; 0.164 ; 0.000         ;
+; fpga_clk                                 ; 0.289 ; 0.000         ;
 +------------------------------------------+-------+---------------+
 
 
@@ -339,8 +353,9 @@ No paths to report.
 +------------------------------------------+--------+---------------+
 ; Clock                                    ; Slack  ; End Point TNS ;
 +------------------------------------------+--------+---------------+
-; fpga_clk                                 ; -2.174 ; -1373.239     ;
-; cpu:cpu|st7920_serial_driver:gpu|lcd_clk ; -0.137 ; -3.355        ;
+; downclocker:dc|clk_out                   ; -2.174 ; -534.258      ;
+; fpga_clk                                 ; -0.533 ; -2.899        ;
+; cpu:cpu|st7920_serial_driver:gpu|lcd_clk ; -0.057 ; -2.411        ;
 +------------------------------------------+--------+---------------+
 
 
@@ -356,12 +371,14 @@ Design MTBF is not calculated because the design doesn't meet its timing require
 +-------------------------------------------+------------+-------+----------+---------+---------------------+
 ; Clock                                     ; Setup      ; Hold  ; Recovery ; Removal ; Minimum Pulse Width ;
 +-------------------------------------------+------------+-------+----------+---------+---------------------+
-; Worst-case Slack                          ; -28.406    ; 0.140 ; N/A      ; N/A     ; -2.636              ;
-;  cpu:cpu|st7920_serial_driver:gpu|lcd_clk ; -28.406    ; 0.140 ; N/A      ; N/A     ; -0.538              ;
-;  fpga_clk                                 ; -11.228    ; 0.164 ; N/A      ; N/A     ; -2.636              ;
-; Design-wide TNS                           ; -97511.922 ; 0.0   ; 0.0      ; 0.0     ; -9111.534           ;
-;  cpu:cpu|st7920_serial_driver:gpu|lcd_clk ; -1742.530  ; 0.000 ; N/A      ; N/A     ; -185.389            ;
-;  fpga_clk                                 ; -95769.392 ; 0.000 ; N/A      ; N/A     ; -8927.522           ;
+; Worst-case Slack                          ; -31.412    ; 0.138 ; N/A      ; N/A     ; -2.636              ;
+;  cpu:cpu|st7920_serial_driver:gpu|lcd_clk ; -31.412    ; 0.138 ; N/A      ; N/A     ; -0.538              ;
+;  downclocker:dc|clk_out                   ; -11.058    ; 0.164 ; N/A      ; N/A     ; -2.636              ;
+;  fpga_clk                                 ; -4.953     ; 0.289 ; N/A      ; N/A     ; -0.627              ;
+; Design-wide TNS                           ; -89275.484 ; 0.0   ; 0.0      ; 0.0     ; -8619.71            ;
+;  cpu:cpu|st7920_serial_driver:gpu|lcd_clk ; -1884.356  ; 0.000 ; N/A      ; N/A     ; -172.550            ;
+;  downclocker:dc|clk_out                   ; -87363.415 ; 0.000 ; N/A      ; N/A     ; -8430.055           ;
+;  fpga_clk                                 ; -29.299    ; 0.000 ; N/A      ; N/A     ; -18.184             ;
 +-------------------------------------------+------------+-------+----------+---------+---------------------+
 
 
@@ -460,10 +477,12 @@ Design MTBF is not calculated because the design doesn't meet its timing require
 +------------------------------------------+------------------------------------------+----------+----------+----------+----------+
 ; From Clock                               ; To Clock                                 ; RR Paths ; FR Paths ; RF Paths ; FF Paths ;
 +------------------------------------------+------------------------------------------+----------+----------+----------+----------+
-; cpu:cpu|st7920_serial_driver:gpu|lcd_clk ; cpu:cpu|st7920_serial_driver:gpu|lcd_clk ; 2667     ; 137      ; 0        ; 1681347  ;
-; fpga_clk                                 ; cpu:cpu|st7920_serial_driver:gpu|lcd_clk ; 0        ; 0        ; 9878     ; 0        ;
+; cpu:cpu|st7920_serial_driver:gpu|lcd_clk ; cpu:cpu|st7920_serial_driver:gpu|lcd_clk ; 2393     ; 126      ; 0        ; 1681819  ;
+; downclocker:dc|clk_out                   ; cpu:cpu|st7920_serial_driver:gpu|lcd_clk ; 0        ; 0        ; 9878     ; 0        ;
+; downclocker:dc|clk_out                   ; downclocker:dc|clk_out                   ; 13182899 ; 148      ; 48       ; 0        ;
 ; cpu:cpu|st7920_serial_driver:gpu|lcd_clk ; fpga_clk                                 ; 1        ; 1        ; 0        ; 0        ;
-; fpga_clk                                 ; fpga_clk                                 ; 12902566 ; 152      ; 48       ; 0        ;
+; downclocker:dc|clk_out                   ; fpga_clk                                 ; 1        ; 1        ; 0        ; 0        ;
+; fpga_clk                                 ; fpga_clk                                 ; 121      ; 0        ; 0        ; 0        ;
 +------------------------------------------+------------------------------------------+----------+----------+----------+----------+
 Entries labeled "false path" only account for clock-to-clock false paths and not path-based false paths. As a result, actual path counts may be lower than reported.
 
@@ -473,10 +492,12 @@ Entries labeled "false path" only account for clock-to-clock false paths and not
 +------------------------------------------+------------------------------------------+----------+----------+----------+----------+
 ; From Clock                               ; To Clock                                 ; RR Paths ; FR Paths ; RF Paths ; FF Paths ;
 +------------------------------------------+------------------------------------------+----------+----------+----------+----------+
-; cpu:cpu|st7920_serial_driver:gpu|lcd_clk ; cpu:cpu|st7920_serial_driver:gpu|lcd_clk ; 2667     ; 137      ; 0        ; 1681347  ;
-; fpga_clk                                 ; cpu:cpu|st7920_serial_driver:gpu|lcd_clk ; 0        ; 0        ; 9878     ; 0        ;
+; cpu:cpu|st7920_serial_driver:gpu|lcd_clk ; cpu:cpu|st7920_serial_driver:gpu|lcd_clk ; 2393     ; 126      ; 0        ; 1681819  ;
+; downclocker:dc|clk_out                   ; cpu:cpu|st7920_serial_driver:gpu|lcd_clk ; 0        ; 0        ; 9878     ; 0        ;
+; downclocker:dc|clk_out                   ; downclocker:dc|clk_out                   ; 13182899 ; 148      ; 48       ; 0        ;
 ; cpu:cpu|st7920_serial_driver:gpu|lcd_clk ; fpga_clk                                 ; 1        ; 1        ; 0        ; 0        ;
-; fpga_clk                                 ; fpga_clk                                 ; 12902566 ; 152      ; 48       ; 0        ;
+; downclocker:dc|clk_out                   ; fpga_clk                                 ; 1        ; 1        ; 0        ; 0        ;
+; fpga_clk                                 ; fpga_clk                                 ; 121      ; 0        ; 0        ; 0        ;
 +------------------------------------------+------------------------------------------+----------+----------+----------+----------+
 Entries labeled "false path" only account for clock-to-clock false paths and not path-based false paths. As a result, actual path counts may be lower than reported.
 
@@ -502,8 +523,8 @@ No non-DPA dedicated SERDES Receiver circuitry present in device or used in desi
 ; Unconstrained Clocks            ; 0     ; 0    ;
 ; Unconstrained Input Ports       ; 0     ; 0    ;
 ; Unconstrained Input Port Paths  ; 0     ; 0    ;
-; Unconstrained Output Ports      ; 7     ; 7    ;
-; Unconstrained Output Port Paths ; 7     ; 7    ;
+; Unconstrained Output Ports      ; 6     ; 6    ;
+; Unconstrained Output Port Paths ; 6     ; 6    ;
 +---------------------------------+-------+------+
 
 
@@ -513,6 +534,7 @@ No non-DPA dedicated SERDES Receiver circuitry present in device or used in desi
 ; Target                                   ; Clock                                    ; Type ; Status      ;
 +------------------------------------------+------------------------------------------+------+-------------+
 ; cpu:cpu|st7920_serial_driver:gpu|lcd_clk ; cpu:cpu|st7920_serial_driver:gpu|lcd_clk ; Base ; Constrained ;
+; downclocker:dc|clk_out                   ; downclocker:dc|clk_out                   ; Base ; Constrained ;
 ; fpga_clk                                 ; fpga_clk                                 ; Base ; Constrained ;
 +------------------------------------------+------------------------------------------+------+-------------+
 
@@ -528,7 +550,6 @@ No non-DPA dedicated SERDES Receiver circuitry present in device or used in desi
 ; led[1]      ; No output delay, min/max delays, false-path exceptions, or max skew assignments found ;
 ; led[2]      ; No output delay, min/max delays, false-path exceptions, or max skew assignments found ;
 ; led[3]      ; No output delay, min/max delays, false-path exceptions, or max skew assignments found ;
-; led[4]      ; No output delay, min/max delays, false-path exceptions, or max skew assignments found ;
 +-------------+---------------------------------------------------------------------------------------+
 
 
@@ -543,7 +564,6 @@ No non-DPA dedicated SERDES Receiver circuitry present in device or used in desi
 ; led[1]      ; No output delay, min/max delays, false-path exceptions, or max skew assignments found ;
 ; led[2]      ; No output delay, min/max delays, false-path exceptions, or max skew assignments found ;
 ; led[3]      ; No output delay, min/max delays, false-path exceptions, or max skew assignments found ;
-; led[4]      ; No output delay, min/max delays, false-path exceptions, or max skew assignments found ;
 +-------------+---------------------------------------------------------------------------------------+
 
 
@@ -553,7 +573,7 @@ No non-DPA dedicated SERDES Receiver circuitry present in device or used in desi
 Info: *******************************************************************
 Info: Running Quartus Prime Timing Analyzer
     Info: Version 23.1std.0 Build 991 11/28/2023 SC Lite Edition
-    Info: Processing started: Sun Apr  7 23:52:18 2024
+    Info: Processing started: Mon Apr  8 08:52:26 2024
 Info: Command: quartus_sta chip8 -c chip8
 Info: qsta_default_script.tcl version: #1
 Warning (18236): Number of processors has not been specified which may cause overloading on shared machines.  Set the global assignment NUM_PARALLEL_PROCESSORS in your QSF to an appropriate value for best performance.
@@ -565,29 +585,33 @@ Info (332142): No user constrained base clocks found in the design. Calling "der
 Info (332105): Deriving Clocks
     Info (332105): create_clock -period 1.000 -name fpga_clk fpga_clk
     Info (332105): create_clock -period 1.000 -name cpu:cpu|st7920_serial_driver:gpu|lcd_clk cpu:cpu|st7920_serial_driver:gpu|lcd_clk
+    Info (332105): create_clock -period 1.000 -name downclocker:dc|clk_out downclocker:dc|clk_out
 Info (332143): No user constrained clock uncertainty found in the design. Calling "derive_clock_uncertainty"
 Info (332123): Deriving Clock Uncertainty. Please refer to report_sdc in the Timing Analyzer to see clock uncertainties.
 Info: Found TIMING_ANALYZER_REPORT_SCRIPT_INCLUDE_DEFAULT_ANALYSIS = ON
 Info: Analyzing Slow 1100mV 100C Model
 Critical Warning (332148): Timing requirements not met
     Info (11105): For recommendations on closing timing, run Report Timing Closure Recommendations in the Timing Analyzer.
-Info (332146): Worst-case setup slack is -28.406
+Info (332146): Worst-case setup slack is -31.412
     Info (332119):     Slack       End Point TNS Clock 
     Info (332119): ========= =================== =====================
-    Info (332119):   -28.406           -1742.530 cpu:cpu|st7920_serial_driver:gpu|lcd_clk 
-    Info (332119):   -11.186          -95769.392 fpga_clk 
+    Info (332119):   -31.412           -1884.356 cpu:cpu|st7920_serial_driver:gpu|lcd_clk 
+    Info (332119):   -11.058          -87363.415 downclocker:dc|clk_out 
+    Info (332119):    -4.953             -27.713 fpga_clk 
 Info (332146): Worst-case hold slack is 0.429
     Info (332119):     Slack       End Point TNS Clock 
     Info (332119): ========= =================== =====================
-    Info (332119):     0.429               0.000 fpga_clk 
-    Info (332119):     0.476               0.000 cpu:cpu|st7920_serial_driver:gpu|lcd_clk 
+    Info (332119):     0.429               0.000 downclocker:dc|clk_out 
+    Info (332119):     0.501               0.000 cpu:cpu|st7920_serial_driver:gpu|lcd_clk 
+    Info (332119):     0.814               0.000 fpga_clk 
 Info (332140): No Recovery paths to report
 Info (332140): No Removal paths to report
 Info (332146): Worst-case minimum pulse width slack is -2.636
     Info (332119):     Slack       End Point TNS Clock 
     Info (332119): ========= =================== =====================
-    Info (332119):    -2.636           -8463.323 fpga_clk 
-    Info (332119):    -0.538            -185.389 cpu:cpu|st7920_serial_driver:gpu|lcd_clk 
+    Info (332119):    -2.636           -8430.055 downclocker:dc|clk_out 
+    Info (332119):    -0.622             -17.105 fpga_clk 
+    Info (332119):    -0.538            -172.550 cpu:cpu|st7920_serial_driver:gpu|lcd_clk 
 Info (332114): Report Metastability: Found 8 synchronizer chains.
     Info (332114): Design MTBF is not calculated because the design doesn't meet its timing requirements.
 Info: Analyzing Slow 1100mV -40C Model
@@ -596,23 +620,26 @@ Info (334004): Delay annotation completed successfully
 Info (332123): Deriving Clock Uncertainty. Please refer to report_sdc in the Timing Analyzer to see clock uncertainties.
 Critical Warning (332148): Timing requirements not met
     Info (11105): For recommendations on closing timing, run Report Timing Closure Recommendations in the Timing Analyzer.
-Info (332146): Worst-case setup slack is -26.933
+Info (332146): Worst-case setup slack is -29.494
     Info (332119):     Slack       End Point TNS Clock 
     Info (332119): ========= =================== =====================
-    Info (332119):   -26.933           -1684.576 cpu:cpu|st7920_serial_driver:gpu|lcd_clk 
-    Info (332119):   -11.228          -94100.779 fpga_clk 
-Info (332146): Worst-case hold slack is 0.484
+    Info (332119):   -29.494           -1798.010 cpu:cpu|st7920_serial_driver:gpu|lcd_clk 
+    Info (332119):   -11.057          -87142.095 downclocker:dc|clk_out 
+    Info (332119):    -4.658             -29.299 fpga_clk 
+Info (332146): Worst-case hold slack is 0.483
     Info (332119):     Slack       End Point TNS Clock 
     Info (332119): ========= =================== =====================
-    Info (332119):     0.484               0.000 fpga_clk 
-    Info (332119):     0.565               0.000 cpu:cpu|st7920_serial_driver:gpu|lcd_clk 
+    Info (332119):     0.483               0.000 downclocker:dc|clk_out 
+    Info (332119):     0.546               0.000 cpu:cpu|st7920_serial_driver:gpu|lcd_clk 
+    Info (332119):     0.786               0.000 fpga_clk 
 Info (332140): No Recovery paths to report
 Info (332140): No Removal paths to report
 Info (332146): Worst-case minimum pulse width slack is -2.636
     Info (332119):     Slack       End Point TNS Clock 
     Info (332119): ========= =================== =====================
-    Info (332119):    -2.636           -8927.522 fpga_clk 
-    Info (332119):    -0.538            -184.012 cpu:cpu|st7920_serial_driver:gpu|lcd_clk 
+    Info (332119):    -2.636           -8301.987 downclocker:dc|clk_out 
+    Info (332119):    -0.627             -18.184 fpga_clk 
+    Info (332119):    -0.538            -170.070 cpu:cpu|st7920_serial_driver:gpu|lcd_clk 
 Info (332114): Report Metastability: Found 8 synchronizer chains.
     Info (332114): Design MTBF is not calculated because the design doesn't meet its timing requirements.
 Info: Analyzing Fast 1100mV 100C Model
@@ -621,54 +648,60 @@ Info (334004): Delay annotation completed successfully
 Info (332123): Deriving Clock Uncertainty. Please refer to report_sdc in the Timing Analyzer to see clock uncertainties.
 Critical Warning (332148): Timing requirements not met
     Info (11105): For recommendations on closing timing, run Report Timing Closure Recommendations in the Timing Analyzer.
-Info (332146): Worst-case setup slack is -14.774
+Info (332146): Worst-case setup slack is -16.301
     Info (332119):     Slack       End Point TNS Clock 
     Info (332119): ========= =================== =====================
-    Info (332119):   -14.774            -901.498 cpu:cpu|st7920_serial_driver:gpu|lcd_clk 
-    Info (332119):    -6.214          -50560.530 fpga_clk 
-Info (332146): Worst-case hold slack is 0.162
+    Info (332119):   -16.301           -1018.017 cpu:cpu|st7920_serial_driver:gpu|lcd_clk 
+    Info (332119):    -5.608          -44394.911 downclocker:dc|clk_out 
+    Info (332119):    -3.718              -8.178 fpga_clk 
+Info (332146): Worst-case hold slack is 0.160
     Info (332119):     Slack       End Point TNS Clock 
     Info (332119): ========= =================== =====================
-    Info (332119):     0.162               0.000 cpu:cpu|st7920_serial_driver:gpu|lcd_clk 
-    Info (332119):     0.177               0.000 fpga_clk 
+    Info (332119):     0.160               0.000 cpu:cpu|st7920_serial_driver:gpu|lcd_clk 
+    Info (332119):     0.177               0.000 downclocker:dc|clk_out 
+    Info (332119):     0.303               0.000 fpga_clk 
 Info (332140): No Recovery paths to report
 Info (332140): No Removal paths to report
 Info (332146): Worst-case minimum pulse width slack is -2.174
     Info (332119):     Slack       End Point TNS Clock 
     Info (332119): ========= =================== =====================
-    Info (332119):    -2.174           -1371.543 fpga_clk 
-    Info (332119):    -0.192              -9.702 cpu:cpu|st7920_serial_driver:gpu|lcd_clk 
+    Info (332119):    -2.174            -537.344 downclocker:dc|clk_out 
+    Info (332119):    -0.517              -2.901 fpga_clk 
+    Info (332119):    -0.144              -6.507 cpu:cpu|st7920_serial_driver:gpu|lcd_clk 
 Info (332114): Report Metastability: Found 8 synchronizer chains.
     Info (332114): Design MTBF is not calculated because the design doesn't meet its timing requirements.
 Info: Analyzing Fast 1100mV -40C Model
 Info (332123): Deriving Clock Uncertainty. Please refer to report_sdc in the Timing Analyzer to see clock uncertainties.
 Critical Warning (332148): Timing requirements not met
     Info (11105): For recommendations on closing timing, run Report Timing Closure Recommendations in the Timing Analyzer.
-Info (332146): Worst-case setup slack is -12.462
+Info (332146): Worst-case setup slack is -14.004
     Info (332119):     Slack       End Point TNS Clock 
     Info (332119): ========= =================== =====================
-    Info (332119):   -12.462            -739.747 cpu:cpu|st7920_serial_driver:gpu|lcd_clk 
-    Info (332119):    -4.930          -40871.978 fpga_clk 
-Info (332146): Worst-case hold slack is 0.140
+    Info (332119):   -14.004            -820.600 cpu:cpu|st7920_serial_driver:gpu|lcd_clk 
+    Info (332119):    -4.541          -36337.093 downclocker:dc|clk_out 
+    Info (332119):    -2.859              -5.427 fpga_clk 
+Info (332146): Worst-case hold slack is 0.138
     Info (332119):     Slack       End Point TNS Clock 
     Info (332119): ========= =================== =====================
-    Info (332119):     0.140               0.000 cpu:cpu|st7920_serial_driver:gpu|lcd_clk 
-    Info (332119):     0.164               0.000 fpga_clk 
+    Info (332119):     0.138               0.000 cpu:cpu|st7920_serial_driver:gpu|lcd_clk 
+    Info (332119):     0.164               0.000 downclocker:dc|clk_out 
+    Info (332119):     0.289               0.000 fpga_clk 
 Info (332140): No Recovery paths to report
 Info (332140): No Removal paths to report
 Info (332146): Worst-case minimum pulse width slack is -2.174
     Info (332119):     Slack       End Point TNS Clock 
     Info (332119): ========= =================== =====================
-    Info (332119):    -2.174           -1373.239 fpga_clk 
-    Info (332119):    -0.137              -3.355 cpu:cpu|st7920_serial_driver:gpu|lcd_clk 
+    Info (332119):    -2.174            -534.258 downclocker:dc|clk_out 
+    Info (332119):    -0.533              -2.899 fpga_clk 
+    Info (332119):    -0.057              -2.411 cpu:cpu|st7920_serial_driver:gpu|lcd_clk 
 Info (332114): Report Metastability: Found 8 synchronizer chains.
     Info (332114): Design MTBF is not calculated because the design doesn't meet its timing requirements.
 Info (332102): Design is not fully constrained for setup requirements
 Info (332102): Design is not fully constrained for hold requirements
 Info: Quartus Prime Timing Analyzer was successful. 0 errors, 6 warnings
-    Info: Peak virtual memory: 1353 megabytes
-    Info: Processing ended: Sun Apr  7 23:52:43 2024
-    Info: Elapsed time: 00:00:25
-    Info: Total CPU time (on all processors): 00:01:44
+    Info: Peak virtual memory: 1312 megabytes
+    Info: Processing ended: Mon Apr  8 08:52:45 2024
+    Info: Elapsed time: 00:00:19
+    Info: Total CPU time (on all processors): 00:01:25
 
 

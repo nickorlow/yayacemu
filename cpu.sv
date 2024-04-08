@@ -2,6 +2,7 @@ import structs::*;
 
 module cpu (
     input wire clk_in,
+    input wire fpga_clk,
     input wire [7:0] rd_memory_data,
     output int cycle_counter,
     output logic [11:0] rd_memory_address,
@@ -13,11 +14,14 @@ module cpu (
     output logic [5:0] led
 );
 
+logic [5:0] lcd_led;
   logic alu_rst;
   logic [7:0] alu_result;
   logic alu_overflow;
   logic alu_done;
   logic compute_of;
+
+  assign led = state[5:0];
 
   alu alu (
       alu_rst,
@@ -36,12 +40,12 @@ module cpu (
 `ifndef DUMMY_GPU
   st7920_serial_driver gpu(
 `endif
-      clk_in,
+      fpga_clk,
       1'b1,
       vram,
       lcd_clk,
       lcd_data,
-      led
+      lcd_led
 );
 
   task write_pixels;
@@ -101,7 +105,7 @@ module cpu (
   } draw_state;
 
 
-  struct {
+  struct packed {
       cpu_opcode op;
       data_type src;
       data_type dst;

@@ -1,12 +1,12 @@
-Fitter Status : Successful - Sun Apr  7 23:52:05 2024
+Fitter Status : Successful - Mon Apr  8 08:52:14 2024
 Quartus Prime Version : 23.1std.0 Build 991 11/28/2023 SC Lite Edition
 Revision Name : chip8
 Top-level Entity Name : chip8
 Family : Cyclone V
 Device : 5CSEBA6U23I7
 Timing Models : Final
-Logic utilization (in ALMs) : 10,549 / 41,910 ( 25 % )
-Total registers : 10004
+Logic utilization (in ALMs) : 10,693 / 41,910 ( 26 % )
+Total registers : 10165
 Total pins : 10 / 314 ( 3 % )
 Total virtual pins : 0
 Total block memory bits : 32,768 / 5,662,720 ( < 1 % )

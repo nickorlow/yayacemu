@@ -31,6 +31,9 @@ set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
 set_global_assignment -name SYSTEMVERILOG_FILE "./the-bomb/st7920_serial_driver.sv"
 set_global_assignment -name SYSTEMVERILOG_FILE chip8.sv
 set_global_assignment -name SYSTEMVERILOG_FILE cpu.sv
+set_global_assignment -name SYSTEMVERILOG_FILE alu.sv
+set_global_assignment -name SYSTEMVERILOG_FILE aastructs.sv
+set_global_assignment -name SYSTEMVERILOG_FILE downclocker.sv
 set_global_assignment -name SDC_FILE chip8.sdc
 set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
 set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"

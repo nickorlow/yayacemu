@@ -1,10 +1,10 @@
-Analysis & Synthesis Status : Successful - Sun Apr  7 23:45:53 2024
+Analysis & Synthesis Status : Successful - Mon Apr  8 08:47:47 2024
 Quartus Prime Version : 23.1std.0 Build 991 11/28/2023 SC Lite Edition
 Revision Name : chip8
 Top-level Entity Name : chip8
 Family : Cyclone V
 Logic utilization (in ALMs) : N/A
-Total registers : 8728
+Total registers : 8836
 Total pins : 10
 Total virtual pins : 0
 Total block memory bits : 32,768

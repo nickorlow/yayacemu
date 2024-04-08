@@ -1,5 +1,5 @@
 Analysis & Synthesis report for chip8
-Sun Apr  7 23:45:53 2024
+Mon Apr  8 08:47:47 2024
 Quartus Prime Version 23.1std.0 Build 991 11/28/2023 SC Lite Edition
 
 
@@ -21,14 +21,16 @@ Quartus Prime Version 23.1std.0 Build 991 11/28/2023 SC Lite Edition
  13. Registers Packed Into Inferred Megafunctions
  14. Multiplexer Restructuring Statistics (Restructuring Performed)
  15. Source assignments for memory:mem|altsyncram:mem_rtl_0|altsyncram_dsq1:auto_generated
- 16. Parameter Settings for User Entity Instance: memory:mem
- 17. Parameter Settings for Inferred Entity Instance: memory:mem|altsyncram:mem_rtl_0
- 18. altsyncram Parameter Settings by Entity Instance
- 19. Port Connectivity Checks: "cpu:cpu|st7920_serial_driver:gpu"
- 20. Port Connectivity Checks: "cpu:cpu"
- 21. Post-Synthesis Netlist Statistics for Top Partition
- 22. Elapsed Time Per Partition
- 23. Analysis & Synthesis Messages
+ 16. Parameter Settings for User Entity Instance: downclocker:dc
+ 17. Parameter Settings for User Entity Instance: memory:mem
+ 18. Parameter Settings for Inferred Entity Instance: memory:mem|altsyncram:mem_rtl_0
+ 19. altsyncram Parameter Settings by Entity Instance
+ 20. Port Connectivity Checks: "cpu:cpu|st7920_serial_driver:gpu"
+ 21. Port Connectivity Checks: "cpu:cpu"
+ 22. Post-Synthesis Netlist Statistics for Top Partition
+ 23. Elapsed Time Per Partition
+ 24. Analysis & Synthesis Messages
+ 25. Analysis & Synthesis Suppressed Messages
 
 
 
@@ -55,13 +57,13 @@ https://fpgasoftware.intel.com/eula.
 +----------------------------------------------------------------------------------+
 ; Analysis & Synthesis Summary                                                     ;
 +---------------------------------+------------------------------------------------+
-; Analysis & Synthesis Status     ; Successful - Sun Apr  7 23:45:53 2024          ;
+; Analysis & Synthesis Status     ; Successful - Mon Apr  8 08:47:47 2024          ;
 ; Quartus Prime Version           ; 23.1std.0 Build 991 11/28/2023 SC Lite Edition ;
 ; Revision Name                   ; chip8                                          ;
 ; Top-level Entity Name           ; chip8                                          ;
 ; Family                          ; Cyclone V                                      ;
 ; Logic utilization (in ALMs)     ; N/A                                            ;
-; Total registers                 ; 8728                                           ;
+; Total registers                 ; 8836                                           ;
 ; Total pins                      ; 10                                             ;
 ; Total virtual pins              ; 0                                              ;
 ; Total block memory bits         ; 32,768                                         ;
@@ -170,22 +172,22 @@ https://fpgasoftware.intel.com/eula.
 ; Number detected on machine ; 12          ;
 ; Maximum allowed            ; 12          ;
 ;                            ;             ;
-; Average used               ; 3.71        ;
+; Average used               ; 3.67        ;
 ; Maximum used               ; 12          ;
 ;                            ;             ;
 ; Usage by Processor         ; % Time Used ;
 ;     Processor 1            ; 100.0%      ;
-;     Processor 2            ;  48.5%      ;
-;     Processor 3            ;  48.3%      ;
-;     Processor 4            ;  24.0%      ;
-;     Processor 5            ;  24.0%      ;
-;     Processor 6            ;  24.0%      ;
-;     Processor 7            ;  19.2%      ;
-;     Processor 8            ;  19.2%      ;
-;     Processor 9            ;  19.2%      ;
-;     Processor 10           ;  18.8%      ;
-;     Processor 11           ;  18.8%      ;
-;     Processor 12           ;   7.5%      ;
+;     Processor 2            ;  40.2%      ;
+;     Processor 3            ;  40.2%      ;
+;     Processor 4            ;  35.9%      ;
+;     Processor 5            ;  35.8%      ;
+;     Processor 6            ;  35.8%      ;
+;     Processor 7            ;  25.7%      ;
+;     Processor 8            ;  25.7%      ;
+;     Processor 9            ;   6.9%      ;
+;     Processor 10           ;   6.9%      ;
+;     Processor 11           ;   6.9%      ;
+;     Processor 12           ;   6.8%      ;
 +----------------------------+-------------+
 
 
@@ -197,6 +199,9 @@ https://fpgasoftware.intel.com/eula.
 ; the-bomb/st7920_serial_driver.sv      ; yes             ; User SystemVerilog HDL File                           ; /home/nickorlow/programming/school/warminster/yayacemu/the-bomb/st7920_serial_driver.sv      ;         ;
 ; chip8.sv                              ; yes             ; User SystemVerilog HDL File                           ; /home/nickorlow/programming/school/warminster/yayacemu/chip8.sv                              ;         ;
 ; cpu.sv                                ; yes             ; User SystemVerilog HDL File                           ; /home/nickorlow/programming/school/warminster/yayacemu/cpu.sv                                ;         ;
+; alu.sv                                ; yes             ; User SystemVerilog HDL File                           ; /home/nickorlow/programming/school/warminster/yayacemu/alu.sv                                ;         ;
+; aastructs.sv                          ; yes             ; User SystemVerilog HDL File                           ; /home/nickorlow/programming/school/warminster/yayacemu/aastructs.sv                          ;         ;
+; downclocker.sv                        ; yes             ; User SystemVerilog HDL File                           ; /home/nickorlow/programming/school/warminster/yayacemu/downclocker.sv                        ;         ;
 ; memory.sv                             ; yes             ; Auto-Found SystemVerilog HDL File                     ; /home/nickorlow/programming/school/warminster/yayacemu/memory.sv                             ;         ;
 ; rom.bin                               ; yes             ; Auto-Found Unspecified File                           ; /home/nickorlow/programming/school/warminster/yayacemu/rom.bin                               ;         ;
 ; fontset.bin                           ; yes             ; Auto-Found Unspecified File                           ; /home/nickorlow/programming/school/warminster/yayacemu/fontset.bin                           ;         ;
@@ -214,33 +219,33 @@ https://fpgasoftware.intel.com/eula.
 +---------------------------------------+-----------------+-------------------------------------------------------+----------------------------------------------------------------------------------------------+---------+
 
 
-+--------------------------------------------------------------+
-; Analysis & Synthesis Resource Usage Summary                  ;
-+---------------------------------------------+----------------+
-; Resource                                    ; Usage          ;
-+---------------------------------------------+----------------+
-; Estimate of Logic utilization (ALMs needed) ; 10412          ;
-;                                             ;                ;
-; Combinational ALUT usage for logic          ; 17065          ;
-;     -- 7 input functions                    ; 58             ;
-;     -- 6 input functions                    ; 3654           ;
-;     -- 5 input functions                    ; 5900           ;
-;     -- 4 input functions                    ; 2000           ;
-;     -- <=3 input functions                  ; 5453           ;
-;                                             ;                ;
-; Dedicated logic registers                   ; 8728           ;
-;                                             ;                ;
-; I/O pins                                    ; 10             ;
-; Total MLAB memory bits                      ; 0              ;
-; Total block memory bits                     ; 32768          ;
-;                                             ;                ;
-; Total DSP Blocks                            ; 0              ;
-;                                             ;                ;
-; Maximum fan-out node                        ; fpga_clk~input ;
-; Maximum fan-out                             ; 8564           ;
-; Total fan-out                               ; 102143         ;
-; Average fan-out                             ; 3.96           ;
-+---------------------------------------------+----------------+
++----------------------------------------------------------------------+
+; Analysis & Synthesis Resource Usage Summary                          ;
++---------------------------------------------+------------------------+
+; Resource                                    ; Usage                  ;
++---------------------------------------------+------------------------+
+; Estimate of Logic utilization (ALMs needed) ; 10507                  ;
+;                                             ;                        ;
+; Combinational ALUT usage for logic          ; 17207                  ;
+;     -- 7 input functions                    ; 56                     ;
+;     -- 6 input functions                    ; 3707                   ;
+;     -- 5 input functions                    ; 5934                   ;
+;     -- 4 input functions                    ; 2008                   ;
+;     -- <=3 input functions                  ; 5502                   ;
+;                                             ;                        ;
+; Dedicated logic registers                   ; 8836                   ;
+;                                             ;                        ;
+; I/O pins                                    ; 10                     ;
+; Total MLAB memory bits                      ; 0                      ;
+; Total block memory bits                     ; 32768                  ;
+;                                             ;                        ;
+; Total DSP Blocks                            ; 0                      ;
+;                                             ;                        ;
+; Maximum fan-out node                        ; downclocker:dc|clk_out ;
+; Maximum fan-out                             ; 8652                   ;
+; Total fan-out                               ; 103021                 ;
+; Average fan-out                             ; 3.95                   ;
++---------------------------------------------+------------------------+
 
 
 +------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -248,10 +253,12 @@ https://fpgasoftware.intel.com/eula.
 +-------------------------------------------+---------------------+---------------------------+-------------------+------------+------+--------------+-----------------------------------------------------------------------+----------------------+--------------+
 ; Compilation Hierarchy Node                ; Combinational ALUTs ; Dedicated Logic Registers ; Block Memory Bits ; DSP Blocks ; Pins ; Virtual Pins ; Full Hierarchy Name                                                   ; Entity Name          ; Library Name ;
 +-------------------------------------------+---------------------+---------------------------+-------------------+------------+------+--------------+-----------------------------------------------------------------------+----------------------+--------------+
-; |chip8                                    ; 17065 (1)           ; 8728 (0)                  ; 32768             ; 0          ; 10   ; 0            ; |chip8                                                                ; chip8                ; work         ;
-;    |cpu:cpu|                              ; 17064 (11448)       ; 8728 (8546)               ; 0                 ; 0          ; 0    ; 0            ; |chip8|cpu:cpu                                                        ; cpu                  ; work         ;
-;       |st7920_serial_driver:gpu|          ; 5616 (5570)         ; 182 (129)                 ; 0                 ; 0          ; 0    ; 0            ; |chip8|cpu:cpu|st7920_serial_driver:gpu                               ; st7920_serial_driver ; work         ;
+; |chip8                                    ; 17207 (1)           ; 8836 (0)                  ; 32768             ; 0          ; 10   ; 0            ; |chip8                                                                ; chip8                ; work         ;
+;    |cpu:cpu|                              ; 17195 (11517)       ; 8825 (8594)               ; 0                 ; 0          ; 0    ; 0            ; |chip8|cpu:cpu                                                        ; cpu                  ; work         ;
+;       |alu:alu|                           ; 47 (47)             ; 49 (49)                   ; 0                 ; 0          ; 0    ; 0            ; |chip8|cpu:cpu|alu:alu                                                ; alu                  ; work         ;
+;       |st7920_serial_driver:gpu|          ; 5631 (5585)         ; 182 (129)                 ; 0                 ; 0          ; 0    ; 0            ; |chip8|cpu:cpu|st7920_serial_driver:gpu                               ; st7920_serial_driver ; work         ;
 ;          |commander:com|                  ; 46 (46)             ; 53 (53)                   ; 0                 ; 0          ; 0    ; 0            ; |chip8|cpu:cpu|st7920_serial_driver:gpu|commander:com                 ; commander            ; work         ;
+;    |downclocker:dc|                       ; 11 (11)             ; 11 (11)                   ; 0                 ; 0          ; 0    ; 0            ; |chip8|downclocker:dc                                                 ; downclocker          ; work         ;
 ;    |memory:mem|                           ; 0 (0)               ; 0 (0)                     ; 32768             ; 0          ; 0    ; 0            ; |chip8|memory:mem                                                     ; memory               ; work         ;
 ;       |altsyncram:mem_rtl_0|              ; 0 (0)               ; 0 (0)                     ; 32768             ; 0          ; 0    ; 0            ; |chip8|memory:mem|altsyncram:mem_rtl_0                                ; altsyncram           ; work         ;
 ;          |altsyncram_dsq1:auto_generated| ; 0 (0)               ; 0 (0)                     ; 32768             ; 0          ; 0    ; 0            ; |chip8|memory:mem|altsyncram:mem_rtl_0|altsyncram_dsq1:auto_generated ; altsyncram_dsq1      ; work         ;
@@ -275,23 +282,26 @@ Note: For table entries with two numbers listed, the numbers in parentheses indi
 +------------------------------------------------------------------------+---------------------------------------------+
 ; cpu:cpu|st7920_serial_driver:gpu|d_flip_flop:dff|data_out              ; Stuck at VCC due to stuck port data_in      ;
 ; cpu:cpu|wr_memory_address[0..11]                                       ; Stuck at GND due to stuck port data_in      ;
+; cpu:cpu|compute_of                                                     ; Stuck at GND due to stuck port data_in      ;
 ; cpu:cpu|instr.src_sprite_sz[4]                                         ; Stuck at GND due to stuck port data_in      ;
 ; cpu:cpu|instr.src_sprite_y[5..7]                                       ; Stuck at GND due to stuck port data_in      ;
 ; cpu:cpu|instr.src_sprite_x[6,7]                                        ; Stuck at GND due to stuck port data_in      ;
 ; cpu:cpu|instr.dst[1..31]                                               ; Stuck at GND due to stuck port data_in      ;
-; cpu:cpu|instr.op[2..31]                                                ; Stuck at GND due to stuck port data_in      ;
+; cpu:cpu|instr.op[3..31]                                                ; Stuck at GND due to stuck port data_in      ;
+; cpu:cpu|alu:alu|overflow                                               ; Lost fanout                                 ;
+; cpu:cpu|alu:alu|result_int[8]                                          ; Lost fanout                                 ;
 ; cpu:cpu|wr_memory_data[0..7]                                           ; Stuck at GND due to stuck port clock_enable ;
-; cpu:cpu|draw_state.stage[1..9,11..31]                                  ; Merged with cpu:cpu|draw_state.stage[10]    ;
 ; cpu:cpu|state[4..9,11..31]                                             ; Merged with cpu:cpu|state[10]               ;
 ; cpu:cpu|instr.src[3..31]                                               ; Merged with cpu:cpu|instr.src[0]            ;
+; cpu:cpu|draw_state.stage[1..9,11..31]                                  ; Merged with cpu:cpu|draw_state.stage[10]    ;
 ; cpu:cpu|st7920_serial_driver:gpu|command[8]                            ; Stuck at GND due to stuck port data_in      ;
 ; cpu:cpu|st7920_serial_driver:gpu|commander:com|full_command_bits[0..3] ; Stuck at GND due to stuck port data_in      ;
 ; cpu:cpu|wr_go                                                          ; Stuck at GND due to stuck port data_in      ;
 ; cpu:cpu|draw_state.stage[10]                                           ; Stuck at GND due to stuck port data_in      ;
-; cpu:cpu|instr.src[0]                                                   ; Stuck at GND due to stuck port data_in      ;
 ; cpu:cpu|state[10]                                                      ; Stuck at GND due to stuck port data_in      ;
 ; cpu:cpu|program_counter[12..15]                                        ; Lost fanout                                 ;
-; Total Number of Removed Registers = 187                                ;                                             ;
+; cpu:cpu|instr.src[0]                                                   ; Stuck at GND due to stuck port data_in      ;
+; Total Number of Removed Registers = 189                                ;                                             ;
 +------------------------------------------------------------------------+---------------------------------------------+
 
 
@@ -309,7 +319,11 @@ Note: For table entries with two numbers listed, the numbers in parentheses indi
 ; cpu:cpu|st7920_serial_driver:gpu|commander:com|full_command_bits[0] ; Stuck at GND              ; cpu:cpu|st7920_serial_driver:gpu|commander:com|full_command_bits[1],             ;
 ;                                                                     ; due to stuck port data_in ; cpu:cpu|st7920_serial_driver:gpu|commander:com|full_command_bits[2],             ;
 ;                                                                     ;                           ; cpu:cpu|st7920_serial_driver:gpu|commander:com|full_command_bits[3]              ;
+; cpu:cpu|compute_of                                                  ; Stuck at GND              ; cpu:cpu|alu:alu|overflow, cpu:cpu|alu:alu|result_int[8]                          ;
+;                                                                     ; due to stuck port data_in ;                                                                                  ;
 ; cpu:cpu|st7920_serial_driver:gpu|d_flip_flop:dff|data_out           ; Stuck at VCC              ; cpu:cpu|st7920_serial_driver:gpu|command[8]                                      ;
+;                                                                     ; due to stuck port data_in ;                                                                                  ;
+; cpu:cpu|instr.op[3]                                                 ; Stuck at GND              ; cpu:cpu|instr.src[0]                                                             ;
 ;                                                                     ; due to stuck port data_in ;                                                                                  ;
 +---------------------------------------------------------------------+---------------------------+----------------------------------------------------------------------------------+
 
@@ -319,12 +333,12 @@ Note: For table entries with two numbers listed, the numbers in parentheses indi
 +----------------------------------------------+-------+
 ; Statistic                                    ; Value ;
 +----------------------------------------------+-------+
-; Total registers                              ; 8728  ;
-; Number of registers using Synchronous Clear  ; 118   ;
-; Number of registers using Synchronous Load   ; 29    ;
+; Total registers                              ; 8836  ;
+; Number of registers using Synchronous Clear  ; 169   ;
+; Number of registers using Synchronous Load   ; 21    ;
 ; Number of registers using Asynchronous Clear ; 0     ;
 ; Number of registers using Asynchronous Load  ; 0     ;
-; Number of registers using Clock Enable       ; 8631  ;
+; Number of registers using Clock Enable       ; 8673  ;
 ; Number of registers using Preset             ; 0     ;
 +----------------------------------------------+-------+
 
@@ -334,8 +348,9 @@ Note: For table entries with two numbers listed, the numbers in parentheses indi
 +----------------------------------------+---------+
 ; Inverted Register                      ; Fan out ;
 +----------------------------------------+---------+
+; cpu:cpu|alu_rst                        ; 34      ;
 ; cpu:cpu|program_counter[9]             ; 5       ;
-; Total number of inverted registers = 1 ;         ;
+; Total number of inverted registers = 2 ;         ;
 +----------------------------------------+---------+
 
 
@@ -353,27 +368,28 @@ Note: For table entries with two numbers listed, the numbers in parentheses indi
 +--------------------+-----------+---------------+----------------------+------------------------+------------+-----------------------------------------------------------------------------+
 ; Multiplexer Inputs ; Bus Width ; Baseline Area ; Area if Restructured ; Saving if Restructured ; Registered ; Example Multiplexer Output                                                  ;
 +--------------------+-----------+---------------+----------------------+------------------------+------------+-----------------------------------------------------------------------------+
-; 3:1                ; 5 bits    ; 10 LEs        ; 5 LEs                ; 5 LEs                  ; Yes        ; |chip8|cpu:cpu|st7920_serial_driver:gpu|commander:com|full_command_bits[22] ;
-; 3:1                ; 8 bits    ; 16 LEs        ; 0 LEs                ; 16 LEs                 ; Yes        ; |chip8|cpu:cpu|st7920_serial_driver:gpu|commander:com|full_command_bits[17] ;
-; 3:1                ; 38 bits   ; 76 LEs        ; 0 LEs                ; 76 LEs                 ; Yes        ; |chip8|cpu:cpu|st7920_serial_driver:gpu|commander:com|i[9]                  ;
-; 4:1                ; 32 bits   ; 64 LEs        ; 0 LEs                ; 64 LEs                 ; Yes        ; |chip8|cpu:cpu|st7920_serial_driver:gpu|line_cnt[23]                        ;
-; 4:1                ; 6 bits    ; 12 LEs        ; 12 LEs               ; 0 LEs                  ; Yes        ; |chip8|cpu:cpu|st7920_serial_driver:gpu|x[5]                                ;
+; 3:1                ; 5 bits    ; 10 LEs        ; 5 LEs                ; 5 LEs                  ; Yes        ; |chip8|cpu:cpu|st7920_serial_driver:gpu|commander:com|full_command_bits[21] ;
+; 3:1                ; 8 bits    ; 16 LEs        ; 0 LEs                ; 16 LEs                 ; Yes        ; |chip8|cpu:cpu|st7920_serial_driver:gpu|commander:com|full_command_bits[5]  ;
+; 3:1                ; 38 bits   ; 76 LEs        ; 0 LEs                ; 76 LEs                 ; Yes        ; |chip8|cpu:cpu|st7920_serial_driver:gpu|commander:com|i[15]                 ;
+; 4:1                ; 32 bits   ; 64 LEs        ; 0 LEs                ; 64 LEs                 ; Yes        ; |chip8|cpu:cpu|st7920_serial_driver:gpu|line_cnt[15]                        ;
+; 4:1                ; 6 bits    ; 12 LEs        ; 12 LEs               ; 0 LEs                  ; Yes        ; |chip8|cpu:cpu|st7920_serial_driver:gpu|x[4]                                ;
 ; 4:1                ; 7 bits    ; 14 LEs        ; 7 LEs                ; 7 LEs                  ; Yes        ; |chip8|cpu:cpu|st7920_serial_driver:gpu|y[6]                                ;
-; 5:1                ; 32 bits   ; 96 LEs        ; 32 LEs               ; 64 LEs                 ; Yes        ; |chip8|cpu:cpu|st7920_serial_driver:gpu|i[1]                                ;
+; 5:1                ; 32 bits   ; 96 LEs        ; 32 LEs               ; 64 LEs                 ; Yes        ; |chip8|cpu:cpu|st7920_serial_driver:gpu|i[16]                               ;
 ; 1029:1             ; 2 bits    ; 1372 LEs      ; 1368 LEs             ; 4 LEs                  ; Yes        ; |chip8|cpu:cpu|st7920_serial_driver:gpu|command[6]                          ;
 ; 1059:1             ; 5 bits    ; 3530 LEs      ; 3445 LEs             ; 85 LEs                 ; Yes        ; |chip8|cpu:cpu|st7920_serial_driver:gpu|command[5]                          ;
-; 3:1                ; 5 bits    ; 10 LEs        ; 5 LEs                ; 5 LEs                  ; Yes        ; |chip8|cpu:cpu|draw_state.r[4]                                              ;
-; 4:1                ; 5 bits    ; 10 LEs        ; 10 LEs               ; 0 LEs                  ; Yes        ; |chip8|cpu:cpu|draw_state.c[1]                                              ;
-; 16:1               ; 5 bits    ; 50 LEs        ; 50 LEs               ; 0 LEs                  ; Yes        ; |chip8|cpu:cpu|instr.src_sprite_y[4]                                        ;
-; 16:1               ; 6 bits    ; 60 LEs        ; 60 LEs               ; 0 LEs                  ; Yes        ; |chip8|cpu:cpu|instr.src_sprite_x[2]                                        ;
-; 4:1                ; 12 bits   ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |chip8|cpu:cpu|rd_memory_address[3]                                         ;
-; 5:1                ; 5 bits    ; 15 LEs        ; 5 LEs                ; 10 LEs                 ; Yes        ; |chip8|cpu:cpu|instr.src_sprite_idx[1]                                      ;
-; 5:1                ; 6 bits    ; 18 LEs        ; 6 LEs                ; 12 LEs                 ; Yes        ; |chip8|cpu:cpu|instr.src_byte[9]                                            ;
-; 5:1                ; 2 bits    ; 6 LEs         ; 2 LEs                ; 4 LEs                  ; Yes        ; |chip8|cpu:cpu|draw_state.stage[10]                                         ;
-; 6:1                ; 8 bits    ; 32 LEs        ; 0 LEs                ; 32 LEs                 ; Yes        ; |chip8|cpu:cpu|instr.src_byte[2]                                            ;
-; 6:1                ; 6 bits    ; 24 LEs        ; 12 LEs               ; 12 LEs                 ; Yes        ; |chip8|cpu:cpu|registers[15][5]                                             ;
-; 10:1               ; 4 bits    ; 24 LEs        ; 8 LEs                ; 16 LEs                 ; Yes        ; |chip8|cpu:cpu|program_counter[15]                                          ;
-; 10:1               ; 10 bits   ; 60 LEs        ; 20 LEs               ; 40 LEs                 ; Yes        ; |chip8|cpu:cpu|program_counter[1]                                           ;
+; 3:1                ; 5 bits    ; 10 LEs        ; 5 LEs                ; 5 LEs                  ; Yes        ; |chip8|cpu:cpu|draw_state.r[0]                                              ;
+; 4:1                ; 5 bits    ; 10 LEs        ; 10 LEs               ; 0 LEs                  ; Yes        ; |chip8|cpu:cpu|draw_state.c[3]                                              ;
+; 16:1               ; 8 bits    ; 80 LEs        ; 80 LEs               ; 0 LEs                  ; Yes        ; |chip8|cpu:cpu|instr.alu_i.operand_b[0]                                     ;
+; 16:1               ; 5 bits    ; 50 LEs        ; 50 LEs               ; 0 LEs                  ; Yes        ; |chip8|cpu:cpu|instr.src_sprite_y[0]                                        ;
+; 16:1               ; 6 bits    ; 60 LEs        ; 60 LEs               ; 0 LEs                  ; Yes        ; |chip8|cpu:cpu|instr.src_sprite_x[1]                                        ;
+; 4:1                ; 12 bits   ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |chip8|cpu:cpu|rd_memory_address[8]                                         ;
+; 5:1                ; 5 bits    ; 15 LEs        ; 5 LEs                ; 10 LEs                 ; Yes        ; |chip8|cpu:cpu|instr.src_sprite_idx[3]                                      ;
+; 5:1                ; 2 bits    ; 6 LEs         ; 2 LEs                ; 4 LEs                  ; Yes        ; |chip8|cpu:cpu|draw_state.stage[0]                                          ;
+; 7:1                ; 8 bits    ; 32 LEs        ; 8 LEs                ; 24 LEs                 ; Yes        ; |chip8|cpu:cpu|registers[15][5]                                             ;
+; 8:1                ; 6 bits    ; 30 LEs        ; 6 LEs                ; 24 LEs                 ; Yes        ; |chip8|cpu:cpu|instr.src_byte[11]                                           ;
+; 9:1                ; 4 bits    ; 24 LEs        ; 8 LEs                ; 16 LEs                 ; Yes        ; |chip8|cpu:cpu|program_counter[15]                                          ;
+; 9:1                ; 8 bits    ; 48 LEs        ; 16 LEs               ; 32 LEs                 ; Yes        ; |chip8|cpu:cpu|instr.src_byte[1]                                            ;
+; 12:1               ; 10 bits   ; 80 LEs        ; 20 LEs               ; 60 LEs                 ; Yes        ; |chip8|cpu:cpu|program_counter[10]                                          ;
 +--------------------+-----------+---------------+----------------------+------------------------+------------+-----------------------------------------------------------------------------+
 
 
@@ -384,6 +400,16 @@ Note: For table entries with two numbers listed, the numbers in parentheses indi
 +---------------------------------+--------------------+------+-------------------------+
 ; OPTIMIZE_POWER_DURING_SYNTHESIS ; NORMAL_COMPILATION ; -    ; -                       ;
 +---------------------------------+--------------------+------+-------------------------+
+
+
++-------------------------------------------------------------+
+; Parameter Settings for User Entity Instance: downclocker:dc ;
++----------------+-------+------------------------------------+
+; Parameter Name ; Value ; Type                               ;
++----------------+-------+------------------------------------+
+; DC_BITS        ; 10    ; Signed Integer                     ;
++----------------+-------+------------------------------------+
+Note: In order to hide this table in the UI and the text report file, please set the "Show Parameter Settings in Synthesis Report" option in "Analysis and Synthesis Settings -> More Settings" to "Off".
 
 
 +---------------------------------------------------------+
@@ -477,13 +503,14 @@ Note: In order to hide this table in the UI and the text report file, please set
 +-------------------------------------------+---------------------------------+
 
 
-+--------------------------------------------------------------+
-; Port Connectivity Checks: "cpu:cpu|st7920_serial_driver:gpu" ;
-+--------------+-------+----------+----------------------------+
-; Port         ; Type  ; Severity ; Details                    ;
-+--------------+-------+----------+----------------------------+
-; sys_rst_n_ms ; Input ; Info     ; Stuck at VCC               ;
-+--------------+-------+----------+----------------------------+
++------------------------------------------------------------------------------------------------------------------------+
+; Port Connectivity Checks: "cpu:cpu|st7920_serial_driver:gpu"                                                           ;
++--------------+--------+----------+-------------------------------------------------------------------------------------+
+; Port         ; Type   ; Severity ; Details                                                                             ;
++--------------+--------+----------+-------------------------------------------------------------------------------------+
+; sys_rst_n_ms ; Input  ; Info     ; Stuck at VCC                                                                        ;
+; led          ; Output ; Info     ; Connected to dangling logic. Logic that only feeds a dangling port will be removed. ;
++--------------+--------+----------+-------------------------------------------------------------------------------------+
 
 
 +-------------------------------------------------------------------------------------------------------------------------+
@@ -500,38 +527,38 @@ Note: In order to hide this table in the UI and the text report file, please set
 +-----------------------+-----------------------------+
 ; Type                  ; Count                       ;
 +-----------------------+-----------------------------+
-; arriav_ff             ; 8728                        ;
-;     ENA               ; 8526                        ;
-;     ENA SCLR          ; 77                          ;
-;     ENA SLD           ; 28                          ;
-;     SCLR              ; 41                          ;
+; arriav_ff             ; 8836                        ;
+;     ENA               ; 8568                        ;
+;     ENA SCLR          ; 85                          ;
+;     ENA SLD           ; 20                          ;
+;     SCLR              ; 84                          ;
 ;     SLD               ; 1                           ;
-;     plain             ; 55                          ;
-; arriav_lcell_comb     ; 17066                       ;
-;     arith             ; 257                         ;
+;     plain             ; 78                          ;
+; arriav_lcell_comb     ; 17207                       ;
+;     arith             ; 307                         ;
 ;         0 data inputs ; 7                           ;
-;         1 data inputs ; 229                         ;
-;         2 data inputs ; 17                          ;
+;         1 data inputs ; 271                         ;
+;         2 data inputs ; 25                          ;
 ;         3 data inputs ; 1                           ;
 ;         4 data inputs ; 1                           ;
 ;         5 data inputs ; 2                           ;
-;     extend            ; 58                          ;
-;         7 data inputs ; 58                          ;
-;     normal            ; 16745                       ;
-;         0 data inputs ; 2                           ;
+;     extend            ; 56                          ;
+;         7 data inputs ; 56                          ;
+;     normal            ; 16838                       ;
+;         0 data inputs ; 1                           ;
 ;         1 data inputs ; 1                           ;
-;         2 data inputs ; 176                         ;
-;         3 data inputs ; 5015                        ;
-;         4 data inputs ; 1999                        ;
-;         5 data inputs ; 5898                        ;
-;         6 data inputs ; 3654                        ;
+;         2 data inputs ; 198                         ;
+;         3 data inputs ; 4992                        ;
+;         4 data inputs ; 2007                        ;
+;         5 data inputs ; 5932                        ;
+;         6 data inputs ; 3707                        ;
 ;     shared            ; 6                           ;
 ;         2 data inputs ; 6                           ;
 ; boundary_port         ; 10                          ;
 ; stratixv_ram_block    ; 8                           ;
 ;                       ;                             ;
 ; Max LUT depth         ; 55.00                       ;
-; Average LUT depth     ; 17.90                       ;
+; Average LUT depth     ; 17.74                       ;
 +-----------------------+-----------------------------+
 
 
@@ -540,7 +567,7 @@ Note: In order to hide this table in the UI and the text report file, please set
 +----------------+--------------+
 ; Partition Name ; Elapsed Time ;
 +----------------+--------------+
-; Top            ; 00:00:53     ;
+; Top            ; 00:00:44     ;
 +----------------+--------------+
 
 
@@ -550,7 +577,7 @@ Note: In order to hide this table in the UI and the text report file, please set
 Info: *******************************************************************
 Info: Running Quartus Prime Analysis & Synthesis
     Info: Version 23.1std.0 Build 991 11/28/2023 SC Lite Edition
-    Info: Processing started: Sun Apr  7 23:44:51 2024
+    Info: Processing started: Mon Apr  8 08:46:51 2024
 Info: Command: quartus_map --read_settings_files=on --write_settings_files=off chip8 -c chip8
 Warning (18236): Number of processors has not been specified which may cause overloading on shared machines.  Set the global assignment NUM_PARALLEL_PROCESSORS in your QSF to an appropriate value for best performance.
 Info (20030): Parallel compilation is enabled and will use 12 of the 12 processors detected
@@ -561,27 +588,37 @@ Info (12021): Found 3 design units, including 3 entities, in source file the-bom
 Info (12021): Found 1 design units, including 1 entities, in source file chip8.sv
     Info (12023): Found entity 1: chip8 File: /home/nickorlow/programming/school/warminster/yayacemu/chip8.sv Line: 1
 Info (12021): Found 1 design units, including 1 entities, in source file cpu.sv
-    Info (12023): Found entity 1: cpu File: /home/nickorlow/programming/school/warminster/yayacemu/cpu.sv Line: 1
+    Info (12023): Found entity 1: cpu File: /home/nickorlow/programming/school/warminster/yayacemu/cpu.sv Line: 3
+Info (12021): Found 1 design units, including 1 entities, in source file alu.sv
+    Info (12023): Found entity 1: alu File: /home/nickorlow/programming/school/warminster/yayacemu/alu.sv Line: 3
+Info (12021): Found 1 design units, including 0 entities, in source file aastructs.sv
+    Info (12022): Found design unit 1: structs (SystemVerilog) File: /home/nickorlow/programming/school/warminster/yayacemu/aastructs.sv Line: 1
+Info (12021): Found 1 design units, including 1 entities, in source file downclocker.sv
+    Info (12023): Found entity 1: downclocker File: /home/nickorlow/programming/school/warminster/yayacemu/downclocker.sv Line: 1
 Info (12127): Elaborating entity "chip8" for the top level hierarchy
+Info (12128): Elaborating entity "downclocker" for hierarchy "downclocker:dc" File: /home/nickorlow/programming/school/warminster/yayacemu/chip8.sv Line: 14
+Warning (10230): Verilog HDL assignment warning at downclocker.sv(18): truncated value with size 32 to match size of target (10) File: /home/nickorlow/programming/school/warminster/yayacemu/downclocker.sv Line: 18
 Warning (12125): Using design file memory.sv, which is not specified as a design file for the current project, but contains definitions for 1 design units and 1 entities in project
     Info (12023): Found entity 1: memory File: /home/nickorlow/programming/school/warminster/yayacemu/memory.sv Line: 1
-Info (12128): Elaborating entity "memory" for hierarchy "memory:mem" File: /home/nickorlow/programming/school/warminster/yayacemu/chip8.sv Line: 21
+Info (12128): Elaborating entity "memory" for hierarchy "memory:mem" File: /home/nickorlow/programming/school/warminster/yayacemu/chip8.sv Line: 29
 Warning (10850): Verilog HDL warning at memory.sv(14): number of words (80) in memory file does not match the number of elements in the address range [0:4095] File: /home/nickorlow/programming/school/warminster/yayacemu/memory.sv Line: 14
-Warning (10850): Verilog HDL warning at memory.sv(15): number of words (260) in memory file does not match the number of elements in the address range [512:4095] File: /home/nickorlow/programming/school/warminster/yayacemu/memory.sv Line: 15
-Info (12128): Elaborating entity "cpu" for hierarchy "cpu:cpu" File: /home/nickorlow/programming/school/warminster/yayacemu/chip8.sv Line: 35
-Warning (10230): Verilog HDL assignment warning at cpu.sv(124): truncated value with size 32 to match size of target (16) File: /home/nickorlow/programming/school/warminster/yayacemu/cpu.sv Line: 124
-Warning (10230): Verilog HDL assignment warning at cpu.sv(130): truncated value with size 32 to match size of target (16) File: /home/nickorlow/programming/school/warminster/yayacemu/cpu.sv Line: 130
-Warning (10230): Verilog HDL assignment warning at cpu.sv(147): truncated value with size 32 to match size of target (16) File: /home/nickorlow/programming/school/warminster/yayacemu/cpu.sv Line: 147
-Warning (10230): Verilog HDL assignment warning at cpu.sv(210): truncated value with size 32 to match size of target (5) File: /home/nickorlow/programming/school/warminster/yayacemu/cpu.sv Line: 210
-Warning (10230): Verilog HDL assignment warning at cpu.sv(213): truncated value with size 32 to match size of target (5) File: /home/nickorlow/programming/school/warminster/yayacemu/cpu.sv Line: 213
-Warning (10230): Verilog HDL assignment warning at cpu.sv(242): truncated value with size 32 to match size of target (16) File: /home/nickorlow/programming/school/warminster/yayacemu/cpu.sv Line: 242
-Warning (10230): Verilog HDL assignment warning at cpu.sv(246): truncated value with size 32 to match size of target (5) File: /home/nickorlow/programming/school/warminster/yayacemu/cpu.sv Line: 246
-Warning (10230): Verilog HDL assignment warning at cpu.sv(257): truncated value with size 32 to match size of target (5) File: /home/nickorlow/programming/school/warminster/yayacemu/cpu.sv Line: 257
-Warning (10230): Verilog HDL assignment warning at cpu.sv(284): truncated value with size 32 to match size of target (16) File: /home/nickorlow/programming/school/warminster/yayacemu/cpu.sv Line: 284
-Warning (10030): Net "instr.src_reg" at cpu.sv(108) has no driver or initial value, using a default initial value '0' File: /home/nickorlow/programming/school/warminster/yayacemu/cpu.sv Line: 108
-Warning (10030): Net "instr.src_addr" at cpu.sv(108) has no driver or initial value, using a default initial value '0' File: /home/nickorlow/programming/school/warminster/yayacemu/cpu.sv Line: 108
-Warning (10030): Net "instr.dst_addr" at cpu.sv(108) has no driver or initial value, using a default initial value '0' File: /home/nickorlow/programming/school/warminster/yayacemu/cpu.sv Line: 108
-Info (12128): Elaborating entity "st7920_serial_driver" for hierarchy "cpu:cpu|st7920_serial_driver:gpu" File: /home/nickorlow/programming/school/warminster/yayacemu/cpu.sv Line: 28
+Warning (10850): Verilog HDL warning at memory.sv(15): number of words (132) in memory file does not match the number of elements in the address range [512:4095] File: /home/nickorlow/programming/school/warminster/yayacemu/memory.sv Line: 15
+Info (12128): Elaborating entity "cpu" for hierarchy "cpu:cpu" File: /home/nickorlow/programming/school/warminster/yayacemu/chip8.sv Line: 44
+Warning (10230): Verilog HDL assignment warning at cpu.sv(148): truncated value with size 32 to match size of target (16) File: /home/nickorlow/programming/school/warminster/yayacemu/cpu.sv Line: 148
+Warning (10230): Verilog HDL assignment warning at cpu.sv(154): truncated value with size 32 to match size of target (16) File: /home/nickorlow/programming/school/warminster/yayacemu/cpu.sv Line: 154
+Warning (10230): Verilog HDL assignment warning at cpu.sv(171): truncated value with size 32 to match size of target (16) File: /home/nickorlow/programming/school/warminster/yayacemu/cpu.sv Line: 171
+Warning (10230): Verilog HDL assignment warning at cpu.sv(249): truncated value with size 32 to match size of target (5) File: /home/nickorlow/programming/school/warminster/yayacemu/cpu.sv Line: 249
+Warning (10230): Verilog HDL assignment warning at cpu.sv(252): truncated value with size 32 to match size of target (5) File: /home/nickorlow/programming/school/warminster/yayacemu/cpu.sv Line: 252
+Warning (10230): Verilog HDL assignment warning at cpu.sv(281): truncated value with size 32 to match size of target (16) File: /home/nickorlow/programming/school/warminster/yayacemu/cpu.sv Line: 281
+Warning (10230): Verilog HDL assignment warning at cpu.sv(285): truncated value with size 32 to match size of target (5) File: /home/nickorlow/programming/school/warminster/yayacemu/cpu.sv Line: 285
+Warning (10230): Verilog HDL assignment warning at cpu.sv(296): truncated value with size 32 to match size of target (5) File: /home/nickorlow/programming/school/warminster/yayacemu/cpu.sv Line: 296
+Warning (10230): Verilog HDL assignment warning at cpu.sv(323): truncated value with size 32 to match size of target (16) File: /home/nickorlow/programming/school/warminster/yayacemu/cpu.sv Line: 323
+Warning (10230): Verilog HDL assignment warning at cpu.sv(333): truncated value with size 32 to match size of target (16) File: /home/nickorlow/programming/school/warminster/yayacemu/cpu.sv Line: 333
+Warning (10030): Net "instr.src_reg" at cpu.sv(131) has no driver or initial value, using a default initial value '0' File: /home/nickorlow/programming/school/warminster/yayacemu/cpu.sv Line: 131
+Warning (10030): Net "instr.src_addr" at cpu.sv(131) has no driver or initial value, using a default initial value '0' File: /home/nickorlow/programming/school/warminster/yayacemu/cpu.sv Line: 131
+Warning (10030): Net "instr.dst_addr" at cpu.sv(131) has no driver or initial value, using a default initial value '0' File: /home/nickorlow/programming/school/warminster/yayacemu/cpu.sv Line: 131
+Info (12128): Elaborating entity "alu" for hierarchy "cpu:cpu|alu:alu" File: /home/nickorlow/programming/school/warminster/yayacemu/cpu.sv Line: 33
+Info (12128): Elaborating entity "st7920_serial_driver" for hierarchy "cpu:cpu|st7920_serial_driver:gpu" File: /home/nickorlow/programming/school/warminster/yayacemu/cpu.sv Line: 49
 Warning (10036): Verilog HDL or VHDL warning at st7920_serial_driver.sv(23): object "line_idx" assigned a value but never read File: /home/nickorlow/programming/school/warminster/yayacemu/the-bomb/st7920_serial_driver.sv Line: 23
 Warning (10230): Verilog HDL assignment warning at st7920_serial_driver.sv(71): truncated value with size 32 to match size of target (7) File: /home/nickorlow/programming/school/warminster/yayacemu/the-bomb/st7920_serial_driver.sv Line: 71
 Warning (10230): Verilog HDL assignment warning at st7920_serial_driver.sv(84): truncated value with size 32 to match size of target (7) File: /home/nickorlow/programming/school/warminster/yayacemu/the-bomb/st7920_serial_driver.sv Line: 84
@@ -629,22 +666,30 @@ Info (12133): Instantiated megafunction "memory:mem|altsyncram:mem_rtl_0" with t
 Info (12021): Found 1 design units, including 1 entities, in source file db/altsyncram_dsq1.tdf
     Info (12023): Found entity 1: altsyncram_dsq1 File: /home/nickorlow/programming/school/warminster/yayacemu/db/altsyncram_dsq1.tdf Line: 28
 Warning (13024): Output pins are stuck at VCC or GND
-    Warning (13410): Pin "led[5]" is stuck at VCC File: /home/nickorlow/programming/school/warminster/yayacemu/chip8.sv Line: 7
+    Warning (13410): Pin "led[4]" is stuck at GND File: /home/nickorlow/programming/school/warminster/yayacemu/chip8.sv Line: 7
+    Warning (13410): Pin "led[5]" is stuck at GND File: /home/nickorlow/programming/school/warminster/yayacemu/chip8.sv Line: 7
 Info (286030): Timing-Driven Synthesis is running
-Info (17049): 4 registers lost all their fanouts during netlist optimizations.
+Info (17049): 6 registers lost all their fanouts during netlist optimizations.
+Info (144001): Generated suppressed messages file /home/nickorlow/programming/school/warminster/yayacemu/output_files/chip8.map.smsg
 Info (16010): Generating hard_block partition "hard_block:auto_generated_inst"
     Info (16011): Adding 0 node(s), including 0 DDIO, 0 PLL, 0 transceiver and 0 LCELL
 Warning (21074): Design contains 1 input pin(s) that do not drive logic
     Warning (15610): No output dependent on input pin "rst_in" File: /home/nickorlow/programming/school/warminster/yayacemu/chip8.sv Line: 3
-Info (21057): Implemented 17374 device resources after synthesis - the final resource count might be different
+Info (21057): Implemented 17552 device resources after synthesis - the final resource count might be different
     Info (21058): Implemented 2 input pins
     Info (21059): Implemented 8 output pins
-    Info (21061): Implemented 17356 logic cells
+    Info (21061): Implemented 17534 logic cells
     Info (21064): Implemented 8 RAM segments
-Info: Quartus Prime Analysis & Synthesis was successful. 0 errors, 26 warnings
-    Info: Peak virtual memory: 698 megabytes
-    Info: Processing ended: Sun Apr  7 23:45:53 2024
-    Info: Elapsed time: 00:01:02
-    Info: Total CPU time (on all processors): 00:01:46
+Info: Quartus Prime Analysis & Synthesis was successful. 0 errors, 29 warnings
+    Info: Peak virtual memory: 775 megabytes
+    Info: Processing ended: Mon Apr  8 08:47:47 2024
+    Info: Elapsed time: 00:00:56
+    Info: Total CPU time (on all processors): 00:01:34
+
+
++------------------------------------------+
+; Analysis & Synthesis Suppressed Messages ;
++------------------------------------------+
+The suppressed messages can be found in /home/nickorlow/programming/school/warminster/yayacemu/output_files/chip8.map.smsg.
 
 

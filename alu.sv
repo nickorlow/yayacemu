@@ -33,7 +33,7 @@ module alu(
                     result_int <= in.operand_a + in.operand_b;
                     result <= result_int[7:0];
                     overflow <= result_int[8];
-                    if (cnt == 2) begin
+                    if (cnt >= 2) begin
                         $display("%b %b + %b %b ya", result, in.operand_a, in.operand_b, result_int);
                         done <= 1;
                     end

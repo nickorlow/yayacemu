@@ -5,6 +5,14 @@ module chip8 (
     output logic lcd_data,
     output logic [5:0] led
 );
+logic slow_clk;
+`ifdef FAST_CLK
+    assign slow_clk = fpga_clk;
+`endif
+
+`ifndef FAST_CLK
+    downclocker #(10) dc(fpga_clk, slow_clk);
+`endif
 
   logic [7:0] rd_memory_data;
   logic [11:0] rd_memory_address;
@@ -12,7 +20,7 @@ module chip8 (
   logic [7:0] wr_memory_data;
   logic wr_go;
   memory #(4096) mem (
-        fpga_clk,
+        slow_clk,
         wr_go,
         wr_memory_address,
         wr_memory_data,
@@ -22,6 +30,7 @@ module chip8 (
   
   int cycle_counter;
   cpu cpu (
+      slow_clk,
       fpga_clk,
       rd_memory_data,
       cycle_counter,
