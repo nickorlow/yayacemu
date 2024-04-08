@@ -12,13 +12,11 @@
 
 #define SCREEN_WIDTH 128 
 #define SCREEN_HEIGHT 64 
-#define EMULATION_HZ 2000
+#define EMULATION_HZ 10000
 
-FILE *rom_file;
 SDL_Window *window;
 SDL_Renderer *renderer;
 SDL_Texture *texture;
-char *rom_name;
 
 void init_screen() {
   SDL_Init(SDL_INIT_EVERYTHING);
@@ -57,27 +55,6 @@ void draw_screen(const svLogicVecVal *vram) {
   free(screen);
   std::cout << "INF_EMU: Drawing Frame" << '\n';
 }
-
-int load_rom() {
-  std::cout << "INF_EMU: Loading ROM " << rom_name << '\n';
-  rom_file = fopen(rom_name, "r");
-
-  if (rom_file == NULL) {
-    std::cout << "INF_EMU: Error reading ROM file. Panicing." << '\n';
-    exit(1);
-  }
-
-  fseek(rom_file, 0L, SEEK_END);
-  int rom_size = ftell(rom_file);
-  fseek(rom_file, 0L, SEEK_SET);
-  std::cout << "INF_EMU: ROM size is %d bytes " << rom_size << '\n';
-
-  return rom_size;
-}
-
-svBitVecVal get_next_instr() { return (uint8_t)fgetc(rom_file); }
-
-void close_rom() { fclose(rom_file); }
 
 svBitVecVal get_key() {
   SDL_Event event;
@@ -133,24 +110,19 @@ svBitVecVal get_key() {
 }
 
 int main(int argc, char **argv) {
-  if (argc < 2) {
-    std::cout << "Use: yayacemu [ROM_NAME]" << '\n';
-    exit(1);
-  }
-
-  rom_name = argv[1];
-
   VerilatedContext *contextp = new VerilatedContext;
   contextp->commandArgs(argc, argv);
 
   Vchip8 *dut = new Vchip8{contextp};
 
-  dut->rst_in = 1;
+  dut->rst_in = 0;
+  dut->fpga_clk = 1;
   while (true) {
-    dut->clk_in ^= 1;
+    dut->fpga_clk ^= 1;
     dut->eval();
-    dut->rst_in = 0;
+
     usleep(1000000 / EMULATION_HZ);
+
     if (SDL_QuitRequested()) {
       std::cout << "INF_EMU: Received Quit from SDL. Goodbye!" << '\n';
       break;

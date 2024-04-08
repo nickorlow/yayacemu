@@ -1,317 +1,317 @@
 module cpu (
-    input wire system_ready,
-    output bit [7:0] memory[0:4095],
     input wire clk_in,
-    input wire keyboard[15:0],
-    input wire [7:0] random_number,
+    input wire [7:0] rd_memory_data,
     output int cycle_counter,
-    output wire [15:0] program_counter,
-    output wire [7:0] vram[0:1023],
-    output wire [7:0] sound_timer
+    output logic [11:0] rd_memory_address,
+    output logic [11:0] wr_memory_address,
+    output logic [7:0] wr_memory_data,
+    output logic wr_go,
+    output logic lcd_clk,
+    output logic lcd_data,
+    output logic [5:0] led
 );
 
-  bit halt;
-  int watch_key;
+  logic [7:0] vram [0:1023];
 
-  logic [15:0] stack[0:15];
-  logic [15:0] index_reg;
-  logic [3:0] stack_pointer;
-  logic [7:0] registers[0:15];
-  logic [15:0] opcode;
-  logic [7:0] delay_timer;
+`ifdef DUMMY_GPU
+  gpu gpu(
+`endif
+`ifndef DUMMY_GPU
+  st7920_serial_driver gpu(
+`endif
+      clk_in,
+      1'b1,
+      vram,
+      lcd_clk,
+      lcd_data,
+      led
+);
 
-  logic [15:0] scratch;
-  logic [15:0] scratch2;
-
-  logic [7:0] scratch_8;
-  logic [7:0] scratch_82;
-
-  logic [31:0] x_cord;
-  logic [31:0] y_cord;
-  logic [7:0] size;
-  logic screen_pixel;
-  logic [7:0] sprite_pixel;
-  
   task write_pixels;
     input [31:0] x;
     input [31:0] y;
 
-    int i;
-     
-     begin
-         // bottom left
-         i = (y*128*2) + x*2 +127;
+    begin
+        // bottom left
+        `define BLP ((y*128*2) + x*2 +127)
+        if (vram[`BLP/8][7-(`BLP%8)] == 1) begin
+          registers[15] <= 1;
+        end
+        vram[`BLP/8][7-(`BLP%8)] <= 1;      
 
-         if (vram[i/8][7-(i%8)] == 1) begin
-           registers[15] = 1;
-         end
+        // bottom right
+        `define BRP ((y*128*2) + x*2 +128)
+        vram[`BRP/8][7-(`BRP%8)] <= 1;      
 
-         vram[i/8][7-(i%8)] ^= 1;      
+        // top left
+        `define TLP ((y*128*2) + x*2-1)
+        vram[`TLP/8][7-(`TLP%8)] <= 1;      
 
-         // bottom right
-         i = (y*128*2) + x*2 +128;
-         vram[i/8][7-(i%8)] ^= 1;      
-
-         // top left
-         i = (y*128*2) + x*2-1;
-         vram[i/8][7-(i%8)] ^= 1;      
-
-         // top right
-         i = (y*128*2) + x*2;
-         vram[i/8][7-(i%8)] ^= 1;      
-     end
+        // top right
+        `define TRP ((y*128*2) + x*2)
+        vram[`TRP/8][7-(`TRP%8)] <= 1;      
+    end
   endtask
 
-  always_ff @(negedge clk_in) begin
-    if (system_ready) begin
-    opcode = {memory[program_counter+0], memory[program_counter+1]};
-    $display("HW     : opcode is 0x%h (%b)", opcode, opcode);
-    $display("HW     : PC %0d 0x%h", program_counter, program_counter);
+  logic [15:0] program_counter;
 
-    if (cycle_counter % 20 == 0) begin
-      if (delay_timer > 0) delay_timer--;
-      if (sound_timer > 0) sound_timer--;
+  logic [7:0] registers[0:15];
+  logic [15:0] index_reg;
+
+  logic [15:0] stack[0:15];
+
+  logic [3:0] stack_pointer;
+  logic [15:0] opcode;
+
+  logic [7:0] sound_timer;
+  logic [7:0] delay_timer;
+  
+
+  typedef enum {ST_FETCH_HI, ST_FETCH_LO, ST_FETCH_LO2, ST_DECODE, ST_EXEC, ST_DRAW, ST_FETCH_MEM, ST_WB, ST_CLEANUP, ST_HALT} cpu_state;
+  cpu_state state;
+  
+  typedef enum {INIT, DRAW} draw_stage;
+  
+  typedef enum {CLS, LD, DRW, JP} cpu_opcode;
+  typedef enum {REG, IDX_REG, BYTE, MEM, SPRITE_MEM} data_type;
+
+  struct {
+      draw_stage stage;
+      logic [4:0] r;
+      logic [4:0] c;
+      logic [7:0] x;
+      logic [7:0] y;
+  } draw_state;
+
+
+  struct {
+      cpu_opcode op;
+      data_type src;
+      data_type dst;
+
+      logic [3:0] dst_reg;
+      logic [3:0] src_reg;
+      
+      logic [11:0] src_byte;
+
+      logic [(8*16)-1:0] src_sprite;
+      logic [11:0] src_sprite_addr;
+      logic [3:0] src_sprite_vx;
+      logic [3:0] src_sprite_vy;
+      logic [7:0] src_sprite_x;
+      logic [7:0] src_sprite_y;
+      logic [4:0] src_sprite_sz;
+      logic [4:0] src_sprite_idx;
+
+      logic [11:0] src_addr;
+      logic [11:0] dst_addr;
+  } instr;
+
+  initial begin
+    state = ST_FETCH_HI;
+    cycle_counter = 0;
+    program_counter = 'h200;
+    wr_go = 0;
+    for (int i = 0; i < 2048; i++) begin
+        vram[i] = 0;
     end
+  end
 
-    casez (opcode)
-      'h00E0: begin
-        $display("HW     : INSTR CLS");
-        for (int i = 0; i < 2048; i++) begin
-          vram[i] = 0;
+  always_ff @(posedge clk_in) begin
+    case (state)
+        ST_FETCH_HI: begin
+            rd_memory_address <= program_counter[11:0];
+            program_counter <= program_counter + 1;
+            state <= ST_FETCH_LO;
         end
-      end
-      'h00EE: begin
-        $display("HW     : INSTR RET");
-        stack_pointer--;
-        program_counter = stack[stack_pointer];
-      end
-      'h0???:  $display("HW     : INSTR SYS addr (Treating as NOP)");
-      'h1???: begin
-        $display("HW     : INSTR JP addr");
-        program_counter = (opcode & 'h0FFF) - 2;
-      end
-      'h2???: begin
-        $display("HW     : INSTR CALL addr");
-        stack[stack_pointer] = program_counter;
-        stack_pointer++;
-        program_counter = (opcode & 'h0FFF) - 2;
-      end
-      'h3???: begin
-        $display("HW     : INSTR SE Vx, byte");
-        scratch = (opcode & 'h00FF);
-        if (scratch[7:0] == registers[(opcode&'h0F00)>>8]) begin
-          program_counter += 2;
+
+        ST_FETCH_LO: begin
+            rd_memory_address <= program_counter[11:0];
+            program_counter <= program_counter - 1;
+            opcode <= { rd_memory_data, 8'h00 };
+            $display("CPU    : Opcode HI is %h", rd_memory_data);
+            state <= ST_FETCH_LO2;
         end
-      end
-      'h4???: begin
-        $display("HW     : INSTR SNE Vx, byte");
-        scratch = (opcode & 'h00FF);
-        if (scratch[7:0] != registers[(opcode&'h0F00)>>8]) begin
-          program_counter += 2;
+
+        ST_FETCH_LO2: begin
+            opcode <= { opcode[15:8], rd_memory_data};
+            $display("CPU    : Opcode LO is %h", rd_memory_data);
+            state <= ST_DECODE;
         end
-      end
-      'h5??0: begin
-        $display("HW     : INSTR SE Vx, Vy");
-        if (registers[(opcode&'h00F0)>>4] == registers[(opcode&'h0F00)>>8]) begin
-          program_counter += 2;
+
+        ST_DECODE: begin
+            casez (opcode)
+                16'h00E0: begin
+                   instr.op <= CLS;
+                   state <= ST_CLEANUP;
+                   program_counter <= program_counter + 2;
+                end
+                16'h1???: begin
+                    instr.op <= JP;
+                    instr.src_byte <= opcode[11:0];
+                    state <= ST_EXEC;
+                end
+                16'h6???: begin
+                   $display("Instruction is LD Vx, Byte"); 
+                   instr.op <= LD; 
+
+                   instr.src <= BYTE;
+                   instr.src_byte <= {4'h00, opcode[7:0]};
+
+                   instr.dst <= REG;
+                   instr.dst_reg <= opcode[11:8];
+
+                   state <= ST_EXEC;
+                end
+                16'hA???: begin
+                   $display("Instruction is LD I, Byte"); 
+                   instr.op <= LD; 
+
+                   instr.src <= BYTE;
+                   instr.src_byte <= opcode[11:0];
+
+                   instr.dst <= IDX_REG;
+
+                   state <= ST_EXEC;
+                end
+                16'hD???: begin
+                   instr.op <= DRW; 
+
+                   instr.src <= SPRITE_MEM;
+                   instr.src_sprite_sz <= {1'b0, opcode[3:0]};
+                   instr.src_sprite_addr <= index_reg[11:0];
+                   instr.src_sprite_vx <= opcode[11:8];
+                   instr.src_sprite_vy <= opcode[7:4];
+                   instr.src_sprite_idx <= 0;
+
+                   state <= ST_FETCH_MEM;
+                end
+                default: begin
+                    $display("ILLEGAL INSTRUCTION %h at PC 0x%h (%0d)", opcode, program_counter, program_counter);
+                   $fatal(); 
+                end
+            endcase
         end
-      end
-      'h6???: begin
-        $display("HW     : INSTR LD Vx, byte");
-        scratch = (opcode & 'h00FF);
-        registers[(opcode&'h0F00)>>8] = scratch[7:0];
-      end
-      'h7???: begin
-        $display("HW     : INSTR ADD Vx, byte");
-        scratch = (opcode & 'h00FF);
-        registers[(opcode&'h0F00)>>8] += scratch[7:0];
-      end
-      'h8??0: begin
-        $display("HW     : INSTR LD Vx, Vy");
-        registers[(opcode&'h0F00)>>8] = registers[(opcode&'h00F0)>>4];
-      end
-      'h8??1: begin
-        $display("HW     : INSTR OR Vx, Vy");
-        registers[(opcode&'h0F00)>>8] |= registers[(opcode&'h00F0)>>4];
-        registers[15] = 0;
-      end
-      'h8??2: begin
-        $display("HW     : INSTR AND Vx, Vy");
-        registers[(opcode&'h0F00)>>8] &= registers[(opcode&'h00F0)>>4];
-        registers[15] = 0;
-      end
-      'h8??3: begin
-        $display("HW     : INSTR XOR Vx, Vy");
-        registers[(opcode&'h0F00)>>8] ^= registers[(opcode&'h00F0)>>4];
-        registers[15] = 0;
-      end
-      'h8??4: begin
-        $display("HW     : INSTR ADD Vx, Vy");
-        scratch_8 = registers[(opcode&'h0F00)>>8];
-        registers[(opcode&'h0F00)>>8] += registers[(opcode&'h00F0)>>4];
-        registers[15] = {7'b0000000, scratch_8 > registers[(opcode&'h0F00)>>8]};
-      end
-      'h8??5: begin
-        $display("HW     : INSTR SUB Vx, Vy");
-        scratch_8 = registers[(opcode&'h0F00)>>8];
-        registers[(opcode&'h0F00)>>8] -= registers[(opcode&'h00F0)>>4];
-        registers[15] = {7'b0000000, scratch_8 >= registers[(opcode&'h0F00)>>8]};
-      end
-      'h8??6: begin
-        $display("HW     : INSTR SHR Vx {, Vy}");
-        scratch_8 = registers[(opcode&'h0F00)>>8];
-        registers[(opcode&'h0F00)>>8] = registers[(opcode&'h00F0)>>4] >> 1;
-        registers[15] = {7'b0000000, ((scratch_8 & 8'h01) == 8'h01)};
-      end
-      'h8??7: begin
-        $display("HW     : INSTR SUBN Vx, Vy");
-        scratch_8 = registers[(opcode&'h00F0)>>4];
-        scratch_82 = registers[(opcode&'h0F00)>>8];
-        registers[(opcode & 'h0F00) >> 8] = registers[(opcode & 'h00F0) >> 4] - registers[(opcode & 'h0F00) >> 8];
-        registers[15] = {7'b0000000, (scratch_8 >= scratch_82)};
-      end
-      'h8??E: begin
-        $display("HW     : INSTR SHL Vx {, Vy}");
-        scratch_8 = registers[(opcode&'h0F00)>>8];
-        registers[(opcode&'h0F00)>>8] = registers[(opcode&'h00F0)>>4] << 1;
 
-        registers[15] = {7'b0000000, (scratch_8[7])};
-      end
-      'h9??0: begin
-        $display("HW     : INSTR SNE Vx, Vy");
-        if (registers[(opcode&'h00F0)>>4] != registers[(opcode&'h0F00)>>8]) begin
-          program_counter += 2;
-        end
-      end
-      'hA???: begin
-        $display("HW     : INSTR LD I, addr");
-        index_reg = (opcode & 'h0FFF);
-      end
-      'hb???: begin
-        $display("HW     : INSTR JP V0, addr");
-        program_counter = {8'h00, registers[0]} + (opcode & 'h0FFF) - 2;
-      end
-      'hc???: begin
-        $display("HW     : RND Vx, addr");
-        // TODO: use a real RNG module, this is not synthesizeable
-        scratch = {8'h00, random_number} % 16'h0100;
-        scratch2 = (opcode & 'h00FF);
-        registers[(opcode&'h0F00)>>8] = scratch[7:0] & scratch2[7:0];
-      end
-      'hD???: begin
-        $display("HW     : INSTR DRW Vx, Vy, nibble");
-        if (cycle_counter % 20 != 0) begin
-          halt = 1;
-        end else begin
-          halt   = 0;
-          x_cord = {24'h000000, registers[(opcode&'h0F00)>>8]};
-          y_cord = {24'h000000, registers[(opcode&'h00F0)>>4]};
-
-          x_cord %= 64;
-          y_cord %= 32;
-
-          scratch = (opcode & 'h000F);
-          size = scratch[7:0];
-          registers[15] = 0;
-
-          for (int r = 0; r < size; r++) begin
-            for (int c = 0; c < 8; c++) begin
-              if (r + y_cord >= 32 || x_cord + c >= 64) continue;
-              sprite_pixel = memory[{16'h0000, index_reg}+r] & ('h80 >> c);
-
-              if (|sprite_pixel) begin
-                  write_pixels(x_cord + c, r+y_cord);
-              end
+        ST_FETCH_MEM: begin
+            if (instr.src == MEM) begin
+                if (rd_memory_address == instr.src_addr) begin
+                    instr.src_byte <= { 4'h0, rd_memory_data};
+                    instr.src <= BYTE;
+                    state <= ST_EXEC;
+                end else begin
+                    rd_memory_address <= instr.src_addr;
+                end
             end
-          end
-        end
-      end
-      'hE?9E: begin
-        $display("HW     : INSTR SKP Vx");
-        scratch_8 = registers[(opcode&'h0F00)>>8];
-        if (keyboard[scratch_8[3:0]] == 1) begin
-          program_counter += 2;
-        end
-      end
-      'hE?A1: begin
-        $display("HW     : INSTR SNE Vx");
-        scratch_8 = registers[(opcode&'h0F00)>>8];
-        if (keyboard[scratch_8[3:0]] != 1) begin
-          program_counter += 2;
-        end
-      end
-      'hF?07: begin
-        $display("HW     : INSTR LD Vx, DT");
-        registers[(opcode&'h0F00)>>8] = delay_timer;
-      end
-      'hF?0A: begin
-        $display("HW     : INSTR LD Vx, K");
-        halt = 1;
-        for (int i = 0; i < 16; i++) begin
-          if (watch_key == 255) begin
-            if (keyboard[i]) begin
-              watch_key = i;
+
+            if (instr.src == SPRITE_MEM) begin
+                if (instr.src_sprite_idx == 0) begin
+                    rd_memory_address <= instr.src_sprite_addr + {7'b0000000, instr.src_sprite_idx}; 
+                    instr.src_sprite_idx <= instr.src_sprite_idx + 1;
+                end else if (instr.src_sprite_idx <= instr.src_sprite_sz) begin
+                    rd_memory_address <= instr.src_sprite_addr + {7'b0000000, instr.src_sprite_idx}; 
+                    instr.src_sprite_idx <= instr.src_sprite_idx + 1;
+                    for (int l = 0; l < 8; l++) 
+                        instr.src_sprite[(instr.src_sprite_idx)*8+l] <= rd_memory_data[7-l];
+                    $display("%b", rd_memory_data);
+                end else begin
+                    instr.src_sprite_x <= registers[instr.src_sprite_vx] % 8'd64;
+                    instr.src_sprite_y <= registers[instr.src_sprite_vy] % 8'd32;
+                    state <= ST_DRAW;
+                    draw_state.stage <= INIT;
+                end
             end
-          end else begin
-            if (!keyboard[watch_key]) begin
-              halt = 0;
-              watch_key = 255;
+        end
+
+        ST_HALT: begin end
+
+        ST_DRAW: begin
+            if (draw_state.stage == INIT) begin
+                draw_state.x <= instr.src_sprite_x;
+                draw_state.y <= instr.src_sprite_y;
+
+                draw_state.r <= 0;
+                draw_state.c <= 0;
+
+                draw_state.stage <= DRAW;  
+                registers[15] <= 0;
+            end else begin
+                if (draw_state.r == instr.src_sprite_sz + 1) begin
+                    $display("sprite is %0d big at coord %d %d sprite=%b idx=%0d", instr.src_sprite_sz, instr.src_sprite_x, instr.src_sprite_y, instr.src_sprite, instr.src_sprite_addr);
+                    state <= ST_CLEANUP; 
+                    program_counter <= program_counter + 2;
+                end else begin
+                    if (draw_state.c == 5'd8) begin
+                        draw_state.c <= 0;
+                        draw_state.r <= draw_state.r + 1;
+                    end else begin
+                        /* verilator lint_off WIDTHEXPAND */
+                        if (draw_state.r + instr.src_sprite_y < 32 && draw_state.c + instr.src_sprite_x < 64) begin
+`define DRAW_PX ((draw_state.r + instr.src_sprite_y)*64 + (draw_state.c + instr.src_sprite_x))
+                           
+                            /* verilator lint_off WIDTHEXPAND */
+                            if (instr.src_sprite[(draw_state.r*8) + draw_state.c]) begin
+                                write_pixels(draw_state.c + instr.src_sprite_x, draw_state.r + instr.src_sprite_y);
+                            end
+                        end
+                        draw_state.c <= draw_state.c + 1; 
+                    end
+                end
+                
             end
-          end
         end
-      end
-      'hF?15: begin
-        $display("HW     : INSTR LD DT, Vx");
-        delay_timer = registers[(opcode&'h0F00)>>8];
-      end
-      'hF?18: begin
-        $display("HW     : INSTR LD ST, Vx");
-        sound_timer = registers[(opcode&'h0F00)>>8];
-      end
-      'hF?1E: begin
-        $display("HW     : INSTR ADD I, Vx");
-        index_reg = index_reg + {8'h00, registers[(opcode&'h0F00)>>8]};
-      end
-      'hF?29: begin
-        $display("HW     : INSTR LDL F, Vx");
-        index_reg = registers[(opcode&'h0F00)>>8] * 5;
-      end
-      'hF?33: begin
-        $display("HW     : INSTR LD B, Vx");
-        scratch = {8'h00, registers[(opcode&'h0F00)>>8]};
-        scratch2 = scratch % 10;
-        memory[index_reg+2] = scratch2[7:0];
-        scratch /= 10;
-        scratch2 = scratch % 10;
-        memory[index_reg+1] = scratch2[7:0];
-        scratch /= 10;
-        scratch2 = scratch % 10;
-        memory[index_reg+0] = scratch2[7:0];
-      end
-      'hF?55: begin
-        $display("HW     : INSTR LD [I], Vx");
-        scratch = (opcode & 'h0F00) >> 8;
-        for (bit [7:0] i8 = 0; i8 <= scratch[7:0]; i8++) begin
-          scratch2 = index_reg + {8'h00, i8};
-          memory[scratch2[11:0]] = registers[i8[3:0]];
+
+        ST_EXEC: begin
+            $display("CPU    : IN EXEC");
+            case (instr.op) 
+                LD: begin
+                    if (instr.src == REG) begin
+                        instr.src_byte <= { 4'h0, registers[instr.src_reg] };
+                        instr.src <= BYTE;
+                    end
+                end
+                JP: begin
+                   program_counter <= {4'h00, instr.src_byte}; 
+                   state <= ST_CLEANUP;
+                end
+            endcase
+
+            case (instr.op) 
+                LD,
+                DRW,
+                CLS: begin
+                    
+                    program_counter <= program_counter + 2;
+                    state <= ST_WB; 
+                end
+            endcase
         end
-        index_reg++;
-      end
-      'hF?65: begin
-        $display("HW     : INSTR LD Vx, [I]");
-        scratch = (opcode & 'h0F00) >> 8;
-        for (bit [7:0] i8 = 0; i8 <= scratch[7:0]; i8++) begin
-          scratch2 = index_reg + {8'h00, i8};
-          registers[i8[3:0]] = memory[scratch2[11:0]];
+
+        ST_WB: begin
+            $display("CPU    : IN WB");
+            if (instr.src != BYTE)
+                $fatal();
+
+            case (instr.dst) 
+                MEM: begin
+                   wr_memory_address <= instr.dst_addr;
+                   wr_memory_data <= instr.src_byte[7:0];
+                   wr_go <= 1'b1;
+                   $display("writing back byte %b to %h", instr.src_byte, instr.dst_addr);
+                end
+                REG: registers[instr.dst_reg] <= instr.src_byte[7:0];
+                IDX_REG: index_reg <= {4'h0, instr.src_byte};
+            endcase 
+
+            state <= ST_CLEANUP;
         end
-        index_reg++;
-      end
-      default: $display("HW     : ILLEGAL INSTRUCTION");
+
+        ST_CLEANUP: begin
+           wr_go <= 0; 
+           state <= ST_FETCH_HI;
+        end
     endcase
 
-    if (!halt) program_counter += 2;
-
-    cycle_counter++;
-end
+    cycle_counter <= cycle_counter + 1;
   end
 endmodule

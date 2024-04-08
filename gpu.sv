@@ -1,5 +1,10 @@
 module gpu (
-    input wire [7:0] vram[0:1023]
+    input wire sys_clk,
+    input wire sys_rst_n_ms,
+    input wire [7:0] vram [0:1023],
+    output logic lcd_clk,  // This goes to the E pin
+    output logic lcd_data,  // This goes to the R/W pin
+    output logic [5:0] led
 );
 
   import "DPI-C" function void init_screen();

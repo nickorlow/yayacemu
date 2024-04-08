@@ -1,0 +1,276 @@
+module cpu (
+    input wire system_ready,
+    input wire clk_in,
+    input wire keyboard[15:0],
+    input wire [7:0] random_number,
+    output int cycle_counter,
+    output wire vram [0:1023],
+    output wire [7:0] sound_timer
+);
+
+  logic [15:0] program_counter;
+  logic [7:0] memory[0:4095];
+  logic halt;
+  int watch_key;
+
+  logic [15:0] stack[0:15];
+  logic [15:0] index_reg;
+  logic [3:0] stack_pointer;
+  logic [7:0] registers[0:15];
+  logic [15:0] opcode;
+  logic [7:0] delay_timer;
+
+  logic [15:0] scratch;
+  logic [15:0] scratch2;
+
+  logic [7:0] scratch_8;
+  logic [7:0] scratch_82;
+
+  logic [31:0] x_cord;
+  logic [31:0] y_cord;
+  logic [7:0] size;
+  logic [7:0] sprite_pixel;
+  logic [7:0] i8;
+  
+  initial begin
+	$readmemh("fontset.bin", memory, 0);
+    $readmemb("rom.bin", memory, 'h200);
+  end
+  
+  task write_pixels;
+    input [31:0] x;
+    input [31:0] y;
+
+    int i;
+     
+     begin
+         // bottom left
+         i = (y*64) + x;
+         vram[i] ^= 1;
+     end
+  endtask
+
+  always_ff @(negedge clk_in) begin
+    opcode = {memory[program_counter+0], memory[program_counter+1]};
+
+    if (cycle_counter % 20 == 0) begin
+      if (delay_timer > 0) delay_timer--;
+      if (sound_timer > 0) sound_timer--;
+    end
+
+    casez (opcode)
+      'h00E0: begin
+        for (int i = 0; i < 2048; i++) begin
+          vram[i] = 0;
+        end
+      end
+      'h00EE: begin
+        stack_pointer--;
+        program_counter = stack[stack_pointer];
+      end
+      'h1???: begin
+        program_counter = (opcode & 'h0FFF) - 2;
+      end
+      'h2???: begin
+        stack[stack_pointer] = program_counter;
+        stack_pointer++;
+        program_counter = (opcode & 'h0FFF) - 2;
+      end
+      'h3???: begin
+        scratch = (opcode & 'h00FF);
+        if (scratch[7:0] == registers[(opcode&'h0F00)>>8]) begin
+          program_counter += 2;
+        end
+      end
+      'h4???: begin
+        scratch = (opcode & 'h00FF);
+        if (scratch[7:0] != registers[(opcode&'h0F00)>>8]) begin
+          program_counter += 2;
+        end
+      end
+      'h5??0: begin
+        if (registers[(opcode&'h00F0)>>4] == registers[(opcode&'h0F00)>>8]) begin
+          program_counter += 2;
+        end
+      end
+      'h6???: begin
+        scratch = (opcode & 'h00FF);
+        registers[(opcode&'h0F00)>>8] = scratch[7:0];
+      end
+      'h7???: begin
+        scratch = (opcode & 'h00FF);
+        registers[(opcode&'h0F00)>>8] += scratch[7:0];
+      end
+      'h8??0: begin
+        registers[(opcode&'h0F00)>>8] = registers[(opcode&'h00F0)>>4];
+      end
+      'h8??1: begin
+        registers[(opcode&'h0F00)>>8] |= registers[(opcode&'h00F0)>>4];
+        registers[15] = 0;
+      end
+      'h8??2: begin
+        registers[(opcode&'h0F00)>>8] &= registers[(opcode&'h00F0)>>4];
+        registers[15] = 0;
+      end
+      'h8??3: begin
+        registers[(opcode&'h0F00)>>8] ^= registers[(opcode&'h00F0)>>4];
+        registers[15] = 0;
+      end
+      'h8??4: begin
+        scratch_8 = registers[(opcode&'h0F00)>>8];
+        registers[(opcode&'h0F00)>>8] += registers[(opcode&'h00F0)>>4];
+        registers[15] = {7'b0000000, scratch_8 > registers[(opcode&'h0F00)>>8]};
+      end
+      'h8??5: begin
+        scratch_8 = registers[(opcode&'h0F00)>>8];
+        registers[(opcode&'h0F00)>>8] -= registers[(opcode&'h00F0)>>4];
+        registers[15] = {7'b0000000, scratch_8 >= registers[(opcode&'h0F00)>>8]};
+      end
+      'h8??6: begin
+        scratch_8 = registers[(opcode&'h0F00)>>8];
+        registers[(opcode&'h0F00)>>8] = registers[(opcode&'h00F0)>>4] >> 1;
+        registers[15] = {7'b0000000, ((scratch_8 & 8'h01) == 8'h01)};
+      end
+      'h8??7: begin
+        scratch_8 = registers[(opcode&'h00F0)>>4];
+        scratch_82 = registers[(opcode&'h0F00)>>8];
+        registers[(opcode & 'h0F00) >> 8] = registers[(opcode & 'h00F0) >> 4] - registers[(opcode & 'h0F00) >> 8];
+        registers[15] = {7'b0000000, (scratch_8 >= scratch_82)};
+      end
+      'h8??E: begin
+        scratch_8 = registers[(opcode&'h0F00)>>8];
+        registers[(opcode&'h0F00)>>8] = registers[(opcode&'h00F0)>>4] << 1;
+
+        registers[15] = {7'b0000000, (scratch_8[7])};
+      end
+      'h9??0: begin
+        if (registers[(opcode&'h00F0)>>4] != registers[(opcode&'h0F00)>>8]) begin
+          program_counter += 2;
+        end
+      end
+      'hA???: begin
+        index_reg = (opcode & 'h0FFF);
+      end
+      'hb???: begin
+        program_counter = {8'h00, registers[0]} + (opcode & 'h0FFF) - 2;
+      end
+      'hc???: begin
+        // TODO: use a real RNG module, this is not synthesizeable
+        scratch = {8'h00, random_number} % 16'h0100;
+        scratch2 = (opcode & 'h00FF);
+        registers[(opcode&'h0F00)>>8] = scratch[7:0] & scratch2[7:0];
+      end
+      'hD???: begin
+
+        if (cycle_counter % 20 != 0) begin
+          halt = 1;
+        end else begin
+          halt   = 0;
+          x_cord = {24'h000000, registers[(opcode&'h0F00)>>8]} % 64;
+          y_cord = {24'h000000, registers[(opcode&'h00F0)>>4]} % 32;
+
+          scratch = (opcode & 'h000F);
+          size = scratch[7:0];
+          registers[15] = 0;
+
+          for (int r = 0; r < size; r++) begin
+            for (int c = 0; c < 8; c++) begin
+
+                if (!(r + y_cord >= 32 || x_cord + c >= 64)) begin 
+                    sprite_pixel = memory[{16'h0000, index_reg}+r] & ('h80 >> c);
+
+                    if (|sprite_pixel) begin
+                        write_pixels(x_cord + c, r+y_cord);
+                    end
+                end
+
+            end
+          end
+
+        end
+      end
+      'hE?9E: begin
+        scratch_8 = registers[(opcode&'h0F00)>>8];
+        if (keyboard[scratch_8[3:0]] == 1) begin
+          program_counter += 2;
+        end
+      end
+      'hE?A1: begin
+        scratch_8 = registers[(opcode&'h0F00)>>8];
+        if (keyboard[scratch_8[3:0]] != 1) begin
+          program_counter += 2;
+        end
+      end
+
+      'hF?07: begin
+        registers[(opcode&'h0F00)>>8] = delay_timer;
+      end
+
+      'hF?0A: begin
+        halt = 1;
+        for (int i = 0; i < 16; i++) begin
+          if (watch_key == 255) begin
+            if (keyboard[i]) begin
+              watch_key = i;
+            end
+          end else begin
+            if (!keyboard[watch_key]) begin
+              halt = 0;
+              watch_key = 255;
+            end
+          end
+        end
+      end
+
+      'hF?15: begin
+        delay_timer = registers[(opcode&'h0F00)>>8];
+      end
+
+      'hF?18: begin
+        sound_timer = registers[(opcode&'h0F00)>>8];
+      end
+
+      'hF?1E: begin
+        index_reg = index_reg + {8'h00, registers[(opcode&'h0F00)>>8]};
+      end
+
+      'hF?29: begin
+        index_reg = registers[(opcode&'h0F00)>>8] * 5;
+      end
+
+      'hF?33: begin
+        scratch = {8'h00, registers[(opcode&'h0F00)>>8]};
+        scratch2 = scratch % 10;
+        memory[index_reg+2] = scratch2[7:0];
+        scratch /= 10;
+        scratch2 = scratch % 10;
+        memory[index_reg+1] = scratch2[7:0];
+        scratch /= 10;
+        scratch2 = scratch % 10;
+        memory[index_reg+0] = scratch2[7:0];
+      end
+
+      'hF?55: begin
+        scratch = (opcode & 'h0F00) >> 8;
+        for (i8 = 0; i8 <= scratch[7:0]; i8++) begin
+          scratch2 = index_reg + {8'h00, i8};
+          memory[scratch2[11:0]] = registers[i8[3:0]];
+        end
+        index_reg++;
+      end
+
+      'hF?65: begin
+        scratch = (opcode & 'h0F00) >> 8;
+        for (i8 = 0; i8 <= scratch[7:0]; i8++) begin
+          scratch2 = index_reg + {8'h00, i8};
+          registers[i8[3:0]] = memory[scratch2[11:0]];
+        end
+        index_reg++;
+      end
+    endcase
+
+    if (!halt) program_counter += 2;
+
+    cycle_counter++;
+  end
+endmodule

@@ -1,0 +1,58 @@
+module chip8 (
+    input wire clk_in,
+    input wire rst_in,
+    output logic lcd_clk,
+    output logic lcd_data,
+    output logic [5:0] led
+);
+
+  bit [7:0] vram[0:1023];
+  bit [7:0] memory[0:4095];
+
+  bit keyboard[15:0];
+
+  bit [7:0] sound_timer;
+  bit [15:0] program_counter;
+  int cycle_counter;
+
+  bit rom_ready;
+  bit font_ready;
+  bit system_ready;
+  bit halt;
+
+  bit [7:0] random_number;
+
+  and(system_ready, rom_ready, font_ready);
+
+
+  cpu cpu (
+      system_ready,
+      memory,
+      clk_in,
+      keyboard,
+      random_number,
+      cycle_counter,
+      program_counter,
+      vram,
+      sound_timer 
+  );
+
+  st7920_serial_driver gpu (clk_in, 1'b1, vram, lcd_clk, lcd_data, led);
+
+  rng randy (
+      clk_in,
+      program_counter,
+      keyboard,
+      cycle_counter,
+      random_number
+  );
+
+  initial begin
+    if (~font_ready) begin
+        $readmemh("fontset.bin", memory, 0);
+        $readmemb("rom.bin", memory, 'h200);
+        font_ready = 1;
+        rom_ready = 1;
+    end
+  end
+endmodule

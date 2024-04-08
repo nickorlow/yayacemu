@@ -1,143 +1,38 @@
 module chip8 (
-    input wire clk_in,
-    input wire rst_in
+    input wire fpga_clk,
+    input wire rst_in,
+    output logic lcd_clk, 
+    output logic lcd_data,
+    output logic [5:0] led
 );
 
-  bit [7:0] vram[0:1023];
-  bit [7:0] memory[0:4095];
-
-  bit keyboard[15:0];
-
-  bit [7:0] sound_timer;
-  bit [15:0] program_counter;
+  logic [7:0] rd_memory_data;
+  logic [11:0] rd_memory_address;
+  logic [11:0] wr_memory_address;
+  logic [7:0] wr_memory_data;
+  logic wr_go;
+  memory #(4096) mem (
+        fpga_clk,
+        wr_go,
+        wr_memory_address,
+        wr_memory_data,
+        rd_memory_address,
+        rd_memory_data
+      );
+  
   int cycle_counter;
-
-  bit rom_ready;
-  bit font_ready;
-  bit system_ready;
-  bit halt;
-
-  bit [7:0] random_number;
-
-  and(system_ready, rom_ready, font_ready);
-
-  beeper beeper (sound_timer);
   cpu cpu (
-      system_ready,
-      memory,
-      clk_in,
-      keyboard,
-      random_number,
+      fpga_clk,
+      rd_memory_data,
       cycle_counter,
-      program_counter,
-      vram,
-      sound_timer 
+      rd_memory_address,
+      wr_memory_address,
+      wr_memory_data,
+      wr_go,
+      lcd_clk,
+      lcd_data,
+      led
   );
-  gpu gpu (vram);
-  keyboard kb (
-      clk_in,
-      keyboard
-  );
-  rng randy (
-      clk_in,
-      program_counter,
-      keyboard,
-      cycle_counter,
-      random_number
-  );
-  rom_loader loader (clk_in, rst_in, memory, rom_ready);
 
-  always_ff @(negedge clk_in) begin
-    if (~font_ready) begin
-        bit [7:0] fontset[79:0] = {
-          8'hF0,
-          8'h90,
-          8'h90,
-          8'h90,
-          8'hF0,  // 0
-          8'h20,
-          8'h60,
-          8'h20,
-          8'h20,
-          8'h70,  // 1
-          8'hF0,
-          8'h10,
-          8'hF0,
-          8'h80,
-          8'hF0,  // 2
-          8'hF0,
-          8'h10,
-          8'hF0,
-          8'h10,
-          8'hF0,  // 3
-          8'h90,
-          8'h90,
-          8'hF0,
-          8'h10,
-          8'h10,  // 4
-          8'hF0,
-          8'h80,
-          8'hF0,
-          8'h10,
-          8'hF0,  // 5
-          8'hF0,
-          8'h80,
-          8'hF0,
-          8'h90,
-          8'hF0,  // 6
-          8'hF0,
-          8'h10,
-          8'h20,
-          8'h40,
-          8'h40,  // 7
-          8'hF0,
-          8'h90,
-          8'hF0,
-          8'h90,
-          8'hF0,  // 8
-          8'hF0,
-          8'h90,
-          8'hF0,
-          8'h10,
-          8'hF0,  // 9
-          8'hF0,
-          8'h90,
-          8'hF0,
-          8'h90,
-          8'h90,  // A
-          8'hE0,
-          8'h90,
-          8'hE0,
-          8'h90,
-          8'hE0,  // B
-          8'hF0,
-          8'h80,
-          8'h80,
-          8'h80,
-          8'hF0,  // C
-          8'hE0,
-          8'h90,
-          8'h90,
-          8'h90,
-          8'hE0,  // D
-          8'hF0,
-          8'h80,
-          8'hF0,
-          8'h80,
-          8'hF0,  // E
-          8'hF0,
-          8'h80,
-          8'hF0,
-          8'h80,
-          8'h80  // F
-        };
-    
-        // Load fontset into memory
-        for (int i = 0; i < 80; i++) begin
-          memory[i] = fontset[79-i];
-        end
-
-        font_ready = 1;
-    end
-  end
 endmodule
+
