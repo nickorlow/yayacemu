@@ -112,7 +112,7 @@ module cpu (
     cycle_counter = 0;
     program_counter = 'h200;
     wr_go = 0;
-    for (int i = 0; i < 2048; i++) begin
+    for (int i = 0; i < 1024; i++) begin
         vram[i] = 0;
     end
   end

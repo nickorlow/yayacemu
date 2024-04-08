@@ -25,5 +25,5 @@ format:
 build-fpga: *.sv *.qsf *.qpf rom.bin build-rom
 	quartus_sh --flow compile chip8 && ./make_cdf.sh
 
-run-fpga: build-fpga
+run-fpga: 
 	quartus_pgm -m jtag -o "p;./output_files/chip8.sof" ./output_files/chip8.cdf

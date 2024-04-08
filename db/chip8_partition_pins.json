@@ -32,7 +32,7 @@
 					"strict" : false
 				},
 				{
-					"name" : "clk_in",
+					"name" : "fpga_clk",
 					"strict" : false
 				}
 			]
