@@ -17,6 +17,7 @@ module cpu (
   logic [7:0] alu_result;
   logic alu_overflow;
   logic alu_done;
+  logic compute_of;
 
   alu alu (
       alu_rst,
@@ -193,6 +194,7 @@ module cpu (
                     instr.alu_i.op <= structs::ADD;
                     instr.alu_i.operand_a <= opcode[7:0];
                     instr.alu_i.operand_b <= registers[opcode[11:8]];
+                    compute_of <= 0;
 
                     state <= ST_EXEC;
                 end
@@ -312,7 +314,7 @@ module cpu (
                     if (alu_done) begin
                         instr.src <= BYTE;
                         instr.src_byte <= alu_result;
-                        registers[15] <= alu_overflow;
+                        registers[15] <= compute_of ? alu_overflow : registers[15];
                         state <= ST_WB;
                         program_counter <= program_counter + 2;
                     end
