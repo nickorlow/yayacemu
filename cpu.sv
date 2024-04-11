@@ -56,22 +56,22 @@ logic [5:0] lcd_led;
 
     begin
         // bottom left
-        `define BLP ((y*128*2) + x*2 +127)
+        `define BLP ((y*128*2) + x*2 +128)
         if (vram[`BLP/8][7-(`BLP%8)] == 1) begin
           registers[15] <= 1;
         end
         vram[`BLP/8][7-(`BLP%8)] <= 1;      
 
         // bottom right
-        `define BRP ((y*128*2) + x*2 +128)
+        `define BRP ((y*128*2) + x*2 +129)
         vram[`BRP/8][7-(`BRP%8)] <= 1;      
 
         // top left
-        `define TLP ((y*128*2) + x*2-1)
+        `define TLP ((y*128*2) + x*2)
         vram[`TLP/8][7-(`TLP%8)] <= 1;      
 
         // top right
-        `define TRP ((y*128*2) + x*2)
+        `define TRP ((y*128*2) + x*2+1)
         vram[`TRP/8][7-(`TRP%8)] <= 1;      
     end
   endtask
