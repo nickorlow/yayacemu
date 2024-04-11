@@ -53,7 +53,7 @@ void draw_screen(const svLogicVecVal *vram) {
   SDL_RenderCopy(renderer, texture, NULL, NULL);
   SDL_RenderPresent(renderer);
   free(screen);
-  std::cout << "INF_EMU: Drawing Frame" << '\n';
+  //std::cout << "INF_EMU: Drawing Frame" << '\n';
 }
 
 svBitVecVal get_key() {

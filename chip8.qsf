@@ -38,7 +38,7 @@ set_global_assignment -name SDC_FILE chip8.sdc
 set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
 set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
 set_global_assignment -name CYCLONEII_RESERVE_NCEO_AFTER_CONFIGURATION "USE AS REGULAR IO"
-set_location_assignment PIN_V11 -to fpga_clk 
+set_location_assignment PIN_V11 -to fpga_clk
 
 
 set_location_assignment PIN_D8 -to lcd_clk
