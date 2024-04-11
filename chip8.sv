@@ -3,7 +3,9 @@ module chip8 (
     input wire rst_in,
     output logic lcd_clk, 
     output logic lcd_data,
-    output logic [5:0] led
+    output logic [5:0] led,
+    input wire [3:0] row,
+    output logic [3:0] col
 );
 logic slow_clk;
 `ifdef FAST_CLK
@@ -13,6 +15,9 @@ logic slow_clk;
 `ifndef FAST_CLK
     downclocker #(10) dc(fpga_clk, slow_clk);
 `endif
+
+  logic key_clk;
+  downclocker #(24) dck(fpga_clk, key_clk);
 
   logic [7:0] rd_memory_data;
   logic [11:0] rd_memory_address;
@@ -27,8 +32,16 @@ logic slow_clk;
         rd_memory_address,
         rd_memory_data
       );
+
+  keypad keypad(
+        key_clk,
+        row,
+        col,
+        led
+      );
   
   int cycle_counter;
+  logic [5:0] nc;
   cpu cpu (
       slow_clk,
       fpga_clk,
@@ -40,7 +53,7 @@ logic slow_clk;
       wr_go,
       lcd_clk,
       lcd_data,
-      led
+      nc
   );
 
 endmodule
