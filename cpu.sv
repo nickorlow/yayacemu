@@ -264,7 +264,7 @@ logic [5:0] lcd_led;
                     instr.alu_i.op <= structs::OR;
                     instr.alu_i.operand_a <= registers[opcode[7:4]];
                     instr.alu_i.operand_b <= registers[opcode[11:8]];
-                    compute_of <= 0;
+                    compute_of <= 1;
 
                     state <= ST_EXEC;
                 end
@@ -279,7 +279,7 @@ logic [5:0] lcd_led;
                     instr.alu_i.op <= structs::AND;
                     instr.alu_i.operand_a <= registers[opcode[7:4]];
                     instr.alu_i.operand_b <= registers[opcode[11:8]];
-                    compute_of <= 0;
+                    compute_of <= 1;
 
                     state <= ST_EXEC;
                 end
@@ -294,7 +294,7 @@ logic [5:0] lcd_led;
                     instr.alu_i.op <= structs::XOR;
                     instr.alu_i.operand_a <= registers[opcode[7:4]];
                     instr.alu_i.operand_b <= registers[opcode[11:8]];
-                    compute_of <= 0;
+                    compute_of <= 1;
 
                     state <= ST_EXEC;
                 end
@@ -620,8 +620,12 @@ logic [5:0] lcd_led;
                         instr.src <= BYTE;
                         if (instr.dst == IDX_REG) 
                             instr.src_byte <= alu_result_long[11:0];
-                        else 
+                        else if (instr.dst_reg != 15 || !compute_of) begin 
                             instr.src_byte <= alu_result;
+                        end else begin
+                            instr.src_byte <= alu_overflow;
+                        end
+
                         registers[15] <= compute_of ? alu_overflow : registers[15];
                         if (instr.op == ALU) begin
                             state <= ST_WB;

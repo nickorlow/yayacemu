@@ -14,7 +14,7 @@ module alu(
     int cnt;
 
     initial begin
-        overflow = 1'bx;
+        overflow = 0;
         result = 8'hxx;
         result_int = 9'bxxxxxxxxx;
         done = 0;
@@ -24,7 +24,7 @@ module alu(
     always_ff @(posedge clk_in) begin
         if (rst_in) begin
             done <= 0;        
-            overflow <= 1'bx;
+            overflow <= 0;
             result <= 8'hxx;
             result_int <= 9'bxxxxxxxxx;
             cnt <= 0;
@@ -65,14 +65,17 @@ module alu(
                 end
                 structs::OR: begin
                     result <= in.operand_a | in.operand_b; 
+                    overflow <= 0;
                     done <= 1;
                 end
                 structs::AND: begin
                     result <= in.operand_a & in.operand_b; 
+                    overflow <= 0;
                     done <= 1;
                 end
                 structs::XOR: begin
                     result <= in.operand_a ^ in.operand_b; 
+                    overflow <= 0;
                     done <= 1;
                 end
                 structs::SHR: begin
