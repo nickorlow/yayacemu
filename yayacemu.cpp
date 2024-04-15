@@ -10,9 +10,9 @@
 #include <iostream>
 #include <memory.h>
 
-#define SCREEN_WIDTH 128 
-#define SCREEN_HEIGHT 64 
-#define EMULATION_HZ 10000
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+#define EMULATION_HZ 50000
 
 SDL_Window *window;
 SDL_Renderer *renderer;
@@ -42,71 +42,171 @@ void set_beep(const svBit beep) {
 void draw_screen(const svLogicVecVal *vram) {
   uint32_t *screen = (uint32_t *)malloc(SCREEN_WIDTH * SCREEN_HEIGHT * 32);
   for (int i = 0; i < 1024; i++) {
-      uint8_t line_byte = (uint8_t) vram[i].aval;
-      for (int j = 0; j < 8; j++) {
-            uint8_t pixel_val = (line_byte >> (7-j)) & 1;
-            screen[(i*8) + j] = pixel_val == 1 ? 0xFFFFFFFF : 0x00000000;
-      }
+    uint8_t line_byte = (uint8_t)vram[i].aval;
+    for (int j = 0; j < 8; j++) {
+      uint8_t pixel_val = (line_byte >> (7 - j)) & 1;
+      screen[(i * 8) + j] = pixel_val == 1 ? 0xFFFFFFFF : 0x00000000;
+    }
   }
   SDL_UpdateTexture(texture, NULL, screen, sizeof(screen[0]) * SCREEN_WIDTH);
   SDL_RenderClear(renderer);
   SDL_RenderCopy(renderer, texture, NULL, NULL);
   SDL_RenderPresent(renderer);
   free(screen);
-  //std::cout << "INF_EMU: Drawing Frame" << '\n';
+  // std::cout << "INF_EMU: Drawing Frame" << '\n';
 }
 
-svBitVecVal get_key() {
+// 1 2 3 A
+// 4 5 6 B
+// 7 8 9 C
+// * 0 # D
+//
+int keys[16];
+uint8_t get_key(uint8_t col) {
   SDL_Event event;
-  uint8_t down = 0;
+  uint8_t res = 0xFF;
+
+  // col 1000 - r1
 
   while (SDL_PollEvent(&event)) {
+    uint8_t down = 0;
     switch (event.type) {
     case SDL_KEYDOWN:
-      down = 128;
+      down = 1;
     case SDL_KEYUP:
       switch (event.key.keysym.sym) {
-      case SDLK_0:
-        return down | (uint8_t)0;
-      case SDLK_1:
-        return down | (uint8_t)1;
-      case SDLK_2:
-        return down | (uint8_t)2;
-      case SDLK_3:
-        return down | (uint8_t)3;
-      case SDLK_4:
-        return down | (uint8_t)4;
-      case SDLK_5:
-        return down | (uint8_t)5;
-      case SDLK_6:
-        return down | (uint8_t)6;
-      case SDLK_7:
-        return down | (uint8_t)7;
-      case SDLK_8:
-        return down | (uint8_t)8;
-      case SDLK_9:
-        return down | (uint8_t)9;
-      case SDLK_a:
-        return down | (uint8_t)10;
-      case SDLK_b:
-        return down | (uint8_t)11;
-      case SDLK_c:
-        return down | (uint8_t)12;
-      case SDLK_d:
-        return down | (uint8_t)13;
-      case SDLK_e:
-        return down | (uint8_t)14;
-      case SDLK_f:
-        return down | (uint8_t)15;
-      default:
-        return 255;
-      }
 
-    default:
-      return 255;
+      case SDLK_1:
+        keys[1] = down;
+        break;
+      case SDLK_2:
+        keys[2] = down;
+        break;
+      case SDLK_3:
+        keys[3] = down;
+        break;
+      case SDLK_a:
+        keys[10] = down;
+        break;
+
+      case SDLK_4:
+        keys[4] = down;
+        break;
+      case SDLK_5:
+        keys[5] = down;
+        break;
+      case SDLK_6:
+        keys[6] = down;
+        break;
+      case SDLK_7:
+        keys[7] = down;
+        break;
+      case SDLK_b:
+        keys[11] = down;
+        break;
+
+      case SDLK_8:
+        keys[8] = down;
+        break;
+      case SDLK_9:
+        keys[9] = down;
+        break;
+      case SDLK_c:
+        keys[12] = down;
+        break;
+
+      case SDLK_0:
+        keys[0] = down;
+        break;
+      case SDLK_e:
+        keys[14] = down;
+        break;
+      case SDLK_f:
+        keys[15] = down;
+        break;
+      case SDLK_d:
+        keys[13] = down;
+        break;
+      }
     }
   }
-  return 255;
+
+  if (keys[0] == 1) {
+    if (col == 0b1110)
+      res = res & 0b0111;
+  }
+
+  if (keys[1] == 1) {
+    if (col == 0b1101)
+      res = res & 0b1110;
+  }
+
+  if (keys[2] == 1) {
+    if (col == 0b1110)
+      res = res & 0b1110;
+  }
+
+  if (keys[3] == 1) {
+    if (col == 0b1011)
+      res = res & 0b1110;
+  }
+
+  if (keys[4] == 1) {
+    if (col == 0b1101)
+      res = res & 0b1101;
+  }
+  if (keys[5] == 1) {
+    if (col == 0b1110)
+      res = res & 0b1101;
+  }
+  if (keys[6] == 1) {
+    if (col == 0b1011)
+      res = res & 0b1101;
+  }
+  if (keys[7] == 1) {
+    if (col == 0b1101)
+      res = res & 0b1011;
+  }
+
+  if (keys[8] == 1) {
+    if (col == 0b1110)
+      res = res & 0b1011;
+  }
+  if (keys[9] == 1) {
+    if (col == 0b1011)
+      res = res & 0b1011;
+  }
+
+  if (keys[10] == 1) {
+    if (col == 0b1101)
+      res = res & 0b0111;
+  }
+
+  if (keys[11] == 1) {
+    if (col == 0b1011)
+      res = res & 0b0111;
+  }
+  if (keys[12] == 1) {
+    if (col == 0b0111)
+      res = res & 0b1110;
+  }
+  if (keys[13] == 1) {
+    if (col == 0b0111)
+      res = res & 0b1101;
+  }
+
+  if (keys[14] == 1) {
+    if (col == 0b0111)
+      res = res & 0b1011;
+  }
+  if (keys[15] == 1) {
+    if (col == 0b0111)
+      res = res & 0b0111;
+  }
+
+  //if (res != 0)
+  //  printf("%04b %04b\n", res, col);
+  return res;
 }
 
 int main(int argc, char **argv) {
@@ -118,6 +218,7 @@ int main(int argc, char **argv) {
   dut->rst_in = 0;
   dut->fpga_clk = 1;
   while (true) {
+    dut->row = get_key(dut->col);
     dut->fpga_clk ^= 1;
     dut->eval();
 

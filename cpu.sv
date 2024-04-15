@@ -4,6 +4,7 @@ module cpu (
     input wire clk_in,
     input wire fpga_clk,
     input wire [7:0] rd_memory_data,
+    input wire [15:0] keymap,
     output int cycle_counter,
     output logic [11:0] rd_memory_address,
     output logic [11:0] wr_memory_address,
@@ -11,7 +12,10 @@ module cpu (
     output logic wr_go,
     output logic lcd_clk,
     output logic lcd_data,
-    output logic [5:0] led
+    output logic [5:0] led,
+    input wire [3:0] row,
+    input wire [3:0] col,
+    input wire debug_overlay
 );
 
 logic [5:0] lcd_led;
@@ -60,19 +64,19 @@ logic [5:0] lcd_led;
         if (vram[`BLP/8][7-(`BLP%8)] == 1) begin
           registers[15] <= 1;
         end
-        vram[`BLP/8][7-(`BLP%8)] <= 1;      
+        vram[`BLP/8][7-(`BLP%8)] = vram[`BLP/8][7-(`BLP%8)] ^ 1;      
 
         // bottom right
         `define BRP ((y*128*2) + x*2 +129)
-        vram[`BRP/8][7-(`BRP%8)] <= 1;      
+        vram[`BRP/8][7-(`BRP%8)] = vram[`BRP/8][7-(`BRP%8)] ^ 1;      
 
         // top left
         `define TLP ((y*128*2) + x*2)
-        vram[`TLP/8][7-(`TLP%8)] <= 1;      
+        vram[`TLP/8][7-(`TLP%8)] =  vram[`TLP/8][7-(`TLP%8)] ^ 1;      
 
         // top right
         `define TRP ((y*128*2) + x*2+1)
-        vram[`TRP/8][7-(`TRP%8)] <= 1;      
+        vram[`TRP/8][7-(`TRP%8)] = vram[`TRP/8][7-(`TRP%8)] ^ 1;      
     end
   endtask
 
@@ -90,6 +94,7 @@ logic [5:0] lcd_led;
   logic [7:0] delay_timer;
 
   logic [7:0] ldl_cnt;
+  int clr_cnt;
 
   
 
@@ -98,8 +103,8 @@ logic [5:0] lcd_led;
   
   typedef enum {INIT, DRAW} draw_stage;
   
-  typedef enum {CLS, LD, DRW, JP, ALU, CALU, CALL, RET, ALUJ, LDL, BCD} cpu_opcode;
-  typedef enum {REG, IDX_REG, BYTE, MEM, SPRITE_MEM} data_type;
+  typedef enum {CLS, LD, DRW, JP, ALU, CALU, CALL, RET, ALUJ, LDL, BCD, IOJ, IOW, NIOJ} cpu_opcode;
+  typedef enum {REG, IDX_REG, BYTE, MEM, SPRITE_MEM, KEY, DELAY_TIMER, SOUND_TIMER} data_type;
 
   struct {
       draw_stage stage;
@@ -121,6 +126,7 @@ logic [5:0] lcd_led;
       alu_input alu_i; 
 
       logic [11:0] src_byte;
+      logic [3:0] src_key;
 
       logic [(8*16)-1:0] src_sprite;
       logic [11:0] src_sprite_addr;
@@ -148,6 +154,16 @@ logic [5:0] lcd_led;
   end
 
   always_ff @(posedge clk_in) begin
+`ifdef FAST_CLOCK
+    if (cycle_counter % 100 == 0) begin
+`endif
+        if (delay_timer > 0)
+            delay_timer <= delay_timer - 1;
+        if (sound_timer > 0)
+            sound_timer <= sound_timer - 1;
+`ifdef FAST_CLOCK
+    end
+`endif
     case (state)
         ST_FETCH_HI: begin
             rd_memory_address <= program_counter[11:0];
@@ -172,7 +188,8 @@ logic [5:0] lcd_led;
                 16'h0???: begin
                    if (opcode == 16'h00e0) begin
                         instr.op <= CLS;
-                        state <= ST_CLEANUP;
+                        state <= ST_EXEC;
+                        clr_cnt <= 0;
                         program_counter <= program_counter + 2;
                     end else if (opcode == 16'h00EE) begin
                         instr.op <= RET;
@@ -413,6 +430,61 @@ logic [5:0] lcd_led;
 
                    state <= ST_FETCH_MEM;
                 end
+                16'hE?9E: begin
+                    instr.op <= IOJ; 
+                    instr.src <=  KEY;
+                    instr.src_key <= registers[opcode[11:8]][3:0];
+
+                    state <= ST_EXEC;
+                end
+                16'hE?A1: begin
+                    instr.op <= NIOJ; 
+                    instr.src <=  KEY;
+                    instr.src_key <= registers[opcode[11:8]][3:0];
+
+                    state <= ST_EXEC;
+                end
+                16'hF?07: begin 
+                    instr.op <= LD;
+
+                    instr.src <= DELAY_TIMER;
+
+                    instr.dst <= REG;
+                    instr.dst_reg <= opcode[11:8];
+
+                    state <= ST_EXEC;
+                end
+                16'hF?0A: begin 
+                        $display("IO waiting");
+                    instr.op <= IOW;
+
+                    instr.src <= KEY;
+
+                    instr.dst <= REG;
+                    instr.dst_reg <= opcode[11:8];
+
+                    state <= ST_EXEC;
+                end
+                16'hF?15: begin 
+                    instr.op <= LD;
+
+                    instr.src <= REG;
+                    instr.src_reg <= opcode[11:8];
+
+                    instr.dst <= DELAY_TIMER;
+
+                    state <= ST_EXEC;
+                end
+                16'hF?18: begin 
+                    instr.op <= LD;
+
+                    instr.src <= REG;
+                    instr.src_reg <= opcode[11:8];
+
+                    instr.dst <= SOUND_TIMER;
+
+                    state <= ST_EXEC;
+                end
                 16'hF?1E: begin 
                     instr.op <= ALU;
 
@@ -424,6 +496,16 @@ logic [5:0] lcd_led;
                     instr.alu_i.operand_a <= registers[opcode[11:8]];
                     instr.alu_i.operand_b_long <= index_reg[11:0]; 
                     compute_of <= 0;
+
+                    state <= ST_EXEC;
+                end
+                16'hF?29: begin 
+                    instr.op <= LD;
+
+                    instr.src <= BYTE;
+                    instr.src_byte <= registers[opcode[11:8]] * 5;
+
+                    instr.dst <= IDX_REG;
 
                     state <= ST_EXEC;
                 end
@@ -494,7 +576,6 @@ logic [5:0] lcd_led;
                     instr.src_sprite_idx <= instr.src_sprite_idx + 1;
                     for (int l = 0; l < 8; l++) 
                         instr.src_sprite[(instr.src_sprite_idx)*8+l] <= rd_memory_data[7-l];
-                    $display("%b", rd_memory_data);
                 end else begin
                     instr.src_sprite_x <= registers[instr.src_sprite_vx] % 8'd64;
                     instr.src_sprite_y <= registers[instr.src_sprite_vy] % 8'd32;
@@ -542,13 +623,15 @@ logic [5:0] lcd_led;
         end
 
         ST_EXEC: begin
-            $display("CPU    : IN EXEC");
             case (instr.op) 
                 LD: begin
                     if (instr.src == REG) begin
                         instr.src_byte <= { 4'h0, registers[instr.src_reg] };
                         instr.src <= BYTE;
-                    end
+                    end else if (instr.src == DELAY_TIMER) begin
+                        instr.src_byte <= { 4'h0, delay_timer };
+                        instr.src <= BYTE;
+                    end   
                 end
                 LDL: begin
                     if (instr.dst == REG) begin
@@ -567,7 +650,6 @@ logic [5:0] lcd_led;
                     if (instr.dst == MEM) begin
                         instr.src <= BYTE;
 
-                        $display("%0d set to %h (r%0d)", instr.dst_addr,registers[instr.src_reg], instr.src_reg );
                         instr.src_byte <= {4'h0, registers[instr.src_reg]};
                         instr.src_reg <= instr.src_reg - 1;
                         instr.dst_addr <= instr.dst_addr - 1;
@@ -655,13 +737,49 @@ logic [5:0] lcd_led;
                     program_counter <= stack[stack_pointer-1] + 2;
                     state <= ST_CLEANUP;
                 end
+                IOJ: begin
+                    if (keymap[instr.src_key] == 1) begin
+                        program_counter <= program_counter + 4;
+                    end else begin
+                        program_counter <= program_counter + 2;
+                    end
+                    state <= ST_CLEANUP;
+                end
+                NIOJ: begin
+                    if (keymap[instr.src_key] != 1) begin
+                        program_counter <= program_counter + 4;
+                    end else begin
+                        program_counter <= program_counter + 2;
+                    end
+                    state <= ST_CLEANUP;
+                end
+                IOW: begin
+                    if (|keymap != 0) begin
+                        $display("IO not waiting");
+                        for(int m = 0; m < 16; m++) begin
+                            if (keymap[m])
+                                instr.src_byte <= m[11:0];
+                        end
+                        program_counter <= program_counter + 2;
+                        state <= ST_WB;
+                        instr.src <= BYTE;
+                    end
+                end
+                CLS: begin
+                    if (clr_cnt == 1024) begin
+                        state <= ST_CLEANUP;
+                        program_counter <= program_counter + 2;
+                    end else begin
+                        clr_cnt <= clr_cnt + 1;
+                        vram[clr_cnt] <= 0;
+                    end
+                end
 
             endcase
 
             case (instr.op) 
                 LD,
-                DRW,
-                CLS: begin
+                DRW: begin
                     
                     program_counter <= program_counter + 2;
                     state <= ST_WB; 
@@ -670,7 +788,6 @@ logic [5:0] lcd_led;
         end
 
         ST_WB: begin
-            $display("CPU    : IN WB");
             if (instr.src != BYTE)
                 $fatal();
 
@@ -679,10 +796,11 @@ logic [5:0] lcd_led;
                    wr_memory_address <= instr.dst_addr;
                    wr_memory_data <= instr.src_byte[7:0];
                    wr_go <= 1'b1;
-                   $display("writing back byte %b to %h", instr.src_byte, instr.dst_addr);
                 end
                 REG: registers[instr.dst_reg] <= instr.src_byte[7:0];
                 IDX_REG: index_reg <= {4'h0, instr.src_byte};
+                DELAY_TIMER: delay_timer <= instr.src_byte[7:0];
+                SOUND_TIMER: sound_timer <= instr.src_byte[7:0];
             endcase 
 
             if (instr.op != LDL && instr.op != BCD)
@@ -699,6 +817,17 @@ logic [5:0] lcd_led;
            alu_rst <= 1;
         end
     endcase
+
+    if (debug_overlay) begin
+        for(int w = 0; w < 16; w++) begin
+            vram[16+w] <= keymap[w] ? 8'hff : 0;
+        end
+    
+        for (int z = 0; z < 4; z++) begin
+            vram[32 + z] = col[z] ? 8'hff : 0;
+            vram[64 + z] = row[z] ? 8'hff : 0;
+        end
+    end
 
     cycle_counter <= cycle_counter + 1;
   end
