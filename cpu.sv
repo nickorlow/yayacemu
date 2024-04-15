@@ -13,10 +13,13 @@ module cpu (
     output logic lcd_clk,
     output logic lcd_data,
     output logic [5:0] led,
+    output logic beep,
     input wire [3:0] row,
     input wire [3:0] col,
     input wire debug_overlay
 );
+
+assign beep = sound_timer > 0;
 
 logic [5:0] lcd_led;
   logic alu_rst;
@@ -25,6 +28,8 @@ logic [5:0] lcd_led;
   logic alu_overflow;
   logic alu_done;
   logic compute_of;
+
+  logic [4:0] vblank;
 
   assign led = state[5:0];
 
@@ -64,19 +69,19 @@ logic [5:0] lcd_led;
         if (vram[`BLP/8][7-(`BLP%8)] == 1) begin
           registers[15] <= 1;
         end
-        vram[`BLP/8][7-(`BLP%8)] = vram[`BLP/8][7-(`BLP%8)] ^ 1;      
+        vram[`BLP/8][7-(`BLP%8)] <= vram[`BLP/8][7-(`BLP%8)] ^ 1;      
 
         // bottom right
         `define BRP ((y*128*2) + x*2 +129)
-        vram[`BRP/8][7-(`BRP%8)] = vram[`BRP/8][7-(`BRP%8)] ^ 1;      
+        vram[`BRP/8][7-(`BRP%8)] <= vram[`BRP/8][7-(`BRP%8)] ^ 1;      
 
         // top left
         `define TLP ((y*128*2) + x*2)
-        vram[`TLP/8][7-(`TLP%8)] =  vram[`TLP/8][7-(`TLP%8)] ^ 1;      
+        vram[`TLP/8][7-(`TLP%8)] <=  vram[`TLP/8][7-(`TLP%8)] ^ 1;      
 
         // top right
         `define TRP ((y*128*2) + x*2+1)
-        vram[`TRP/8][7-(`TRP%8)] = vram[`TRP/8][7-(`TRP%8)] ^ 1;      
+        vram[`TRP/8][7-(`TRP%8)] <= vram[`TRP/8][7-(`TRP%8)] ^ 1;      
     end
   endtask
 
@@ -141,6 +146,8 @@ logic [5:0] lcd_led;
       logic [11:0] dst_addr;
   } instr;
 
+  logic [12:0] wait_key;
+
   initial begin
     state = ST_FETCH_HI;
     cycle_counter = 0;
@@ -154,16 +161,16 @@ logic [5:0] lcd_led;
   end
 
   always_ff @(posedge clk_in) begin
-`ifdef FAST_CLOCK
-    if (cycle_counter % 100 == 0) begin
-`endif
+      $display("%0d", sound_timer);
+    if (cycle_counter % 200 == 0) begin
+        vblank <= 0; 
         if (delay_timer > 0)
             delay_timer <= delay_timer - 1;
         if (sound_timer > 0)
             sound_timer <= sound_timer - 1;
-`ifdef FAST_CLOCK
+    end else begin
+        vblank <= 1;
     end
-`endif
     case (state)
         ST_FETCH_HI: begin
             rd_memory_address <= program_counter[11:0];
@@ -190,7 +197,6 @@ logic [5:0] lcd_led;
                         instr.op <= CLS;
                         state <= ST_EXEC;
                         clr_cnt <= 0;
-                        program_counter <= program_counter + 2;
                     end else if (opcode == 16'h00EE) begin
                         instr.op <= RET;
                         state <= ST_EXEC;
@@ -354,7 +360,7 @@ logic [5:0] lcd_led;
                     instr.dst_reg <= opcode[11:8];
                     
                     instr.alu_i.op <= structs::SHR;
-                    instr.alu_i.operand_a <= registers[opcode[11:8]];
+                    instr.alu_i.operand_a <= registers[opcode[7:4]];
                     instr.alu_i.operand_b <= 1;
                     compute_of <= 1;
 
@@ -384,7 +390,7 @@ logic [5:0] lcd_led;
                     instr.dst_reg <= opcode[11:8];
                     
                     instr.alu_i.op <= structs::SHL;
-                    instr.alu_i.operand_a <= registers[opcode[11:8]];
+                    instr.alu_i.operand_a <= registers[opcode[7:4]];
                     instr.alu_i.operand_b <= 1;
                     compute_of <= 1;
 
@@ -411,7 +417,6 @@ logic [5:0] lcd_led;
                 16'hB???: begin
                     instr.op <= ALUJ; 
 
-                    instr.op <= CALU;
                     instr.alu_i.op <= structs::ADDL;
                     instr.alu_i.operand_a <= registers[0];
                     instr.alu_i.operand_b_long <= opcode[11:0];
@@ -455,8 +460,9 @@ logic [5:0] lcd_led;
                     state <= ST_EXEC;
                 end
                 16'hF?0A: begin 
-                        $display("IO waiting");
                     instr.op <= IOW;
+
+                    wait_key[12] <= 1;
 
                     instr.src <= KEY;
 
@@ -524,6 +530,7 @@ logic [5:0] lcd_led;
                 end
                 16'hF?55: begin
                     instr.op <= LDL; 
+                    index_reg <= index_reg + 1;
 
                     instr.src <= REG;
                     instr.src_reg <= opcode[11:8]; //FIXME: need to expand mem?
@@ -539,6 +546,7 @@ logic [5:0] lcd_led;
                 end
                 16'hF?65: begin
                     instr.op <= LDL; 
+                    index_reg <= index_reg + 1;
 
                     instr.src <= MEM;
 /* verilator lint_off WIDTHEXPAND */
@@ -589,14 +597,16 @@ logic [5:0] lcd_led;
 
         ST_DRAW: begin
             if (draw_state.stage == INIT) begin
-                draw_state.x <= instr.src_sprite_x;
-                draw_state.y <= instr.src_sprite_y;
+                if (vblank == 0) begin
+                    draw_state.x <= instr.src_sprite_x;
+                    draw_state.y <= instr.src_sprite_y;
 
-                draw_state.r <= 0;
-                draw_state.c <= 0;
+                    draw_state.r <= 0;
+                    draw_state.c <= 0;
 
-                draw_state.stage <= DRAW;  
-                registers[15] <= 0;
+                    draw_state.stage <= DRAW;  
+                    registers[15] <= 0;
+                end 
             end else begin
                 if (draw_state.r == instr.src_sprite_sz + 1) begin
                     state <= ST_CLEANUP; 
@@ -700,6 +710,7 @@ logic [5:0] lcd_led;
                     alu_rst <= 0;
                     if (alu_done) begin
                         instr.src <= BYTE;
+
                         if (instr.dst == IDX_REG) 
                             instr.src_byte <= alu_result_long[11:0];
                         else if (instr.dst_reg != 15 || !compute_of) begin 
@@ -709,20 +720,24 @@ logic [5:0] lcd_led;
                         end
 
                         registers[15] <= compute_of ? alu_overflow : registers[15];
-                        if (instr.op == ALU) begin
+
+                        if (instr.op === ALU) begin
                             state <= ST_WB;
                             program_counter <= program_counter + 2;
-                        end else if (instr.op == CALU) begin
+
+                        end else if (instr.op === CALU) begin
+
                             state <= ST_CLEANUP;
                             if (|alu_result) begin
                                 program_counter <= program_counter + 4;
                             end else begin
                                 program_counter <= program_counter + 2;
                             end
-                        end else begin
-                            $display("Untested!");
+                        end else if (instr.op === ALUJ) begin
+
                             state <= ST_CLEANUP;
                             program_counter <= alu_result_long;
+
                         end
                     end
                 end
@@ -754,12 +769,17 @@ logic [5:0] lcd_led;
                     state <= ST_CLEANUP;
                 end
                 IOW: begin
-                    if (|keymap != 0) begin
+                    if (|keymap != 0 && wait_key[12] == 1) begin
                         $display("IO not waiting");
                         for(int m = 0; m < 16; m++) begin
-                            if (keymap[m])
-                                instr.src_byte <= m[11:0];
+                            if (keymap[m]) begin
+                                wait_key[11:0] <= m[11:0];
+                                wait_key[12] <= 0;
+                            end
                         end
+                    end
+                    if (keymap[wait_key[3:0]] == 0 && wait_key[12] == 0) begin
+                        instr.src_byte <= wait_key[11:0];
                         program_counter <= program_counter + 2;
                         state <= ST_WB;
                         instr.src <= BYTE;
@@ -771,7 +791,7 @@ logic [5:0] lcd_led;
                         program_counter <= program_counter + 2;
                     end else begin
                         clr_cnt <= clr_cnt + 1;
-                        vram[clr_cnt] <= 0;
+                        vram[clr_cnt] <= 8'h00;
                     end
                 end
 

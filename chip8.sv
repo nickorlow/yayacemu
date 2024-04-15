@@ -5,28 +5,18 @@ module chip8 (
     output logic lcd_data,
     output logic [5:0] led,
     input wire [3:0] row,
-    output logic [3:0] col
+    output logic [3:0] col,
+    output logic beep
 );
 logic debug_overlay;
   logic slow_clk;
-`ifdef FAST_CLK
-  assign slow_clk = fpga_clk;
-`endif
-
-`ifndef FAST_CLK
-  downclocker #(12) dc (
+  downclocker #(1) dc (
       fpga_clk,
       slow_clk
   );
-`endif
 
   logic key_clk;
-`ifdef FAST_CLK
-  downclocker #(1) dck (
-`endif
-`ifndef FAST_CLK
   downclocker #(12) dck (
-`endif
       fpga_clk,
       key_clk
   );
@@ -76,6 +66,7 @@ logic debug_overlay;
       lcd_clk,
       lcd_data,
       nc,
+      beep,
       row,
       col,
       debug_overlay

@@ -12,7 +12,7 @@
 
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
-#define EMULATION_HZ 50000
+#define EMULATION_HZ 100000
 
 SDL_Window *window;
 SDL_Renderer *renderer;
@@ -29,14 +29,6 @@ void init_screen() {
   texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888,
                               SDL_TEXTUREACCESS_STREAMING, SCREEN_WIDTH,
                               SCREEN_HEIGHT);
-  std::cout << "INF_EMU: Screen initialized" << '\n';
-}
-
-void set_beep(const svBit beep) {
-  if (beep == 1)
-    SDL_SetTextureColorMod(texture, 255, 0, 0);
-  else
-    SDL_SetTextureColorMod(texture, 255, 255, 255);
 }
 
 void draw_screen(const svLogicVecVal *vram) {
@@ -222,7 +214,11 @@ int main(int argc, char **argv) {
     dut->fpga_clk ^= 1;
     dut->eval();
 
-    usleep(1000000 / EMULATION_HZ);
+
+    if (dut->beep == 1)
+      SDL_SetTextureColorMod(texture, 255, 0, 0);
+    else
+      SDL_SetTextureColorMod(texture, 255, 255, 255);
 
     if (SDL_QuitRequested()) {
       std::cout << "INF_EMU: Received Quit from SDL. Goodbye!" << '\n';
