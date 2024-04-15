@@ -30,14 +30,14 @@ void init_screen() {
                               SDL_TEXTUREACCESS_STREAMING, SCREEN_WIDTH,
                               SCREEN_HEIGHT);
 }
-
+bool is_beeping;
 void draw_screen(const svLogicVecVal *vram) {
   uint32_t *screen = (uint32_t *)malloc(SCREEN_WIDTH * SCREEN_HEIGHT * 32);
   for (int i = 0; i < 1024; i++) {
     uint8_t line_byte = (uint8_t)vram[i].aval;
     for (int j = 0; j < 8; j++) {
       uint8_t pixel_val = (line_byte >> (7 - j)) & 1;
-      screen[(i * 8) + j] = pixel_val == 1 ? 0xFFFFFFFF : 0x00000000;
+      screen[(i * 8) + j] = pixel_val == 1 ? 0xFFFFFFFF : (is_beeping ? 0xFF000000 : 0x00000000);
     }
   }
   SDL_UpdateTexture(texture, NULL, screen, sizeof(screen[0]) * SCREEN_WIDTH);
@@ -215,10 +215,7 @@ int main(int argc, char **argv) {
     dut->eval();
 
 
-    if (dut->beep == 1)
-      SDL_SetTextureColorMod(texture, 255, 0, 0);
-    else
-      SDL_SetTextureColorMod(texture, 255, 255, 255);
+    is_beeping = dut->beep == 1;
 
     if (SDL_QuitRequested()) {
       std::cout << "INF_EMU: Received Quit from SDL. Goodbye!" << '\n';
