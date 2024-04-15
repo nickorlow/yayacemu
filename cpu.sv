@@ -5,6 +5,7 @@ module cpu (
     input wire fpga_clk,
     input wire [7:0] rd_memory_data,
     input wire [15:0] keymap,
+    input wire [7:0] random_byte,
     output int cycle_counter,
     output logic [11:0] rd_memory_address,
     output logic [11:0] wr_memory_address,
@@ -109,7 +110,7 @@ logic [5:0] lcd_led;
   typedef enum {INIT, DRAW} draw_stage;
   
   typedef enum {CLS, LD, DRW, JP, ALU, CALU, CALL, RET, ALUJ, LDL, BCD, IOJ, IOW, NIOJ} cpu_opcode;
-  typedef enum {REG, IDX_REG, BYTE, MEM, SPRITE_MEM, KEY, DELAY_TIMER, SOUND_TIMER} data_type;
+  typedef enum {REG, IDX_REG, BYTE, MEM, SPRITE_MEM, KEY, DELAY_TIMER, SOUND_TIMER, RAND} data_type;
 
   struct {
       draw_stage stage;
@@ -161,7 +162,6 @@ logic [5:0] lcd_led;
   end
 
   always_ff @(posedge clk_in) begin
-      $display("%0d", sound_timer);
     if (cycle_counter % 200 == 0) begin
         vblank <= 0; 
         if (delay_timer > 0)
@@ -423,6 +423,17 @@ logic [5:0] lcd_led;
                     compute_of <= 0;
                     state <= ST_EXEC; 
                 end
+                16'hC???: begin
+                    instr.op <= LD; 
+
+                    instr.src <= RAND;
+                    instr.src_byte <= {4'h0, opcode[7:0]};
+
+                    instr.dst <= REG;
+                    instr.dst_reg <= opcode[11:8];
+
+                    state <= ST_EXEC; 
+                end
                 16'hD???: begin
                    instr.op <= DRW; 
 
@@ -641,7 +652,10 @@ logic [5:0] lcd_led;
                     end else if (instr.src == DELAY_TIMER) begin
                         instr.src_byte <= { 4'h0, delay_timer };
                         instr.src <= BYTE;
-                    end   
+                    end else if (instr.src == RAND) begin
+                        instr.src_byte <= {4'h0, random_byte} & instr.src_byte ;
+                        instr.src <= BYTE;
+                    end
                 end
                 LDL: begin
                     if (instr.dst == REG) begin

@@ -2,7 +2,7 @@
 
 SDL_CFLAGS = `sdl2-config --cflags`
 SDL_LDFLAGS = `sdl2-config --libs`
-SV_FILES=aastructs.sv cpu.sv chip8.sv gpu.sv alu.sv keypad.sv
+SV_FILES=aastructs.sv cpu.sv chip8.sv gpu.sv alu.sv keypad.sv rng.sv
 
 lint:
 	verilator --lint-only -DDUMMY_GPU --timing ${SV_FILES} 

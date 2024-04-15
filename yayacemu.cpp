@@ -18,6 +18,9 @@ SDL_Window *window;
 SDL_Renderer *renderer;
 SDL_Texture *texture;
 
+int keys[16];
+bool is_beeping;
+
 void init_screen() {
   SDL_Init(SDL_INIT_EVERYTHING);
   window = SDL_CreateWindow(
@@ -30,7 +33,7 @@ void init_screen() {
                               SDL_TEXTUREACCESS_STREAMING, SCREEN_WIDTH,
                               SCREEN_HEIGHT);
 }
-bool is_beeping;
+
 void draw_screen(const svLogicVecVal *vram) {
   uint32_t *screen = (uint32_t *)malloc(SCREEN_WIDTH * SCREEN_HEIGHT * 32);
   for (int i = 0; i < 1024; i++) {
@@ -45,20 +48,11 @@ void draw_screen(const svLogicVecVal *vram) {
   SDL_RenderCopy(renderer, texture, NULL, NULL);
   SDL_RenderPresent(renderer);
   free(screen);
-  // std::cout << "INF_EMU: Drawing Frame" << '\n';
 }
 
-// 1 2 3 A
-// 4 5 6 B
-// 7 8 9 C
-// * 0 # D
-//
-int keys[16];
 uint8_t get_key(uint8_t col) {
   SDL_Event event;
   uint8_t res = 0xFF;
-
-  // col 1000 - r1
 
   while (SDL_PollEvent(&event)) {
     uint8_t down = 0;
@@ -178,10 +172,12 @@ uint8_t get_key(uint8_t col) {
     if (col == 0b1011)
       res = res & 0b0111;
   }
+
   if (keys[12] == 1) {
     if (col == 0b0111)
       res = res & 0b1110;
   }
+
   if (keys[13] == 1) {
     if (col == 0b0111)
       res = res & 0b1101;
@@ -191,13 +187,12 @@ uint8_t get_key(uint8_t col) {
     if (col == 0b0111)
       res = res & 0b1011;
   }
+
   if (keys[15] == 1) {
     if (col == 0b0111)
       res = res & 0b0111;
   }
 
-  //if (res != 0)
-  //  printf("%04b %04b\n", res, col);
   return res;
 }
 
@@ -214,11 +209,10 @@ int main(int argc, char **argv) {
     dut->fpga_clk ^= 1;
     dut->eval();
 
-
     is_beeping = dut->beep == 1;
 
     if (SDL_QuitRequested()) {
-      std::cout << "INF_EMU: Received Quit from SDL. Goodbye!" << '\n';
+      std::cout << "Goodbye!" << '\n';
       break;
     }
   }

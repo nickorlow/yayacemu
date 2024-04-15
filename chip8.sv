@@ -35,6 +35,15 @@ logic debug_overlay;
       rd_memory_data
   );
 
+  logic [7:0] random_byte;
+  rng randy(
+      slow_clk,
+      {wr_memory_data, rd_memory_data},
+      keymap,
+      cycle_counter,
+      random_byte
+      );
+
   logic [15:0] keymap;
 
   keypad keypad (
@@ -58,6 +67,7 @@ logic debug_overlay;
       fpga_clk,
       rd_memory_data,
       keymap,
+      random_byte,
       cycle_counter,
       rd_memory_address,
       wr_memory_address,
