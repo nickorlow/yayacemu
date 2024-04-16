@@ -444,6 +444,7 @@ logic [5:0] lcd_led;
                    instr.src_sprite_vy <= opcode[7:4];
                    instr.src_sprite_idx <= 0;
 
+
                    state <= ST_FETCH_MEM;
                 end
                 16'hE?9E: begin
@@ -569,7 +570,6 @@ logic [5:0] lcd_led;
                     state <= ST_FETCH_MEM;
                 end
                 default: begin
-                    $display("ILLEGAL INSTRUCTION %h at PC 0x%h (%0d)", opcode, program_counter, program_counter);
                     state <= ST_HALT;
                 end
             endcase
@@ -594,7 +594,7 @@ logic [5:0] lcd_led;
                     rd_memory_address <= instr.src_sprite_addr + {7'b0000000, instr.src_sprite_idx}; 
                     instr.src_sprite_idx <= instr.src_sprite_idx + 1;
                     for (int l = 0; l < 8; l++) 
-                        instr.src_sprite[(instr.src_sprite_idx)*8+l] <= rd_memory_data[7-l];
+                        instr.src_sprite[(instr.src_sprite_idx-1)*8+l] <= rd_memory_data[7-l];
                 end else begin
                     instr.src_sprite_x <= registers[instr.src_sprite_vx] % 8'd64;
                     instr.src_sprite_y <= registers[instr.src_sprite_vy] % 8'd32;
@@ -619,7 +619,7 @@ logic [5:0] lcd_led;
                     registers[15] <= 0;
                 end 
             end else begin
-                if (draw_state.r == instr.src_sprite_sz + 1) begin
+                if (draw_state.r == instr.src_sprite_sz) begin
                     state <= ST_CLEANUP; 
                     program_counter <= program_counter + 2;
                 end else begin
@@ -692,7 +692,6 @@ logic [5:0] lcd_led;
                 BCD: begin 
                     instr.src <= BYTE;
                     ldl_cnt <= ldl_cnt + 1;
-                    $display("%0d ldl", ldl_cnt);
                     case (ldl_cnt) 
                        0: begin 
                             instr.src_byte <= (registers[instr.src_reg]/100) % 10;
@@ -784,7 +783,6 @@ logic [5:0] lcd_led;
                 end
                 IOW: begin
                     if (|keymap != 0 && wait_key[12] == 1) begin
-                        $display("IO not waiting");
                         for(int m = 0; m < 16; m++) begin
                             if (keymap[m]) begin
                                 wait_key[11:0] <= m[11:0];

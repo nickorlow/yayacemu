@@ -85,3 +85,7 @@ set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to row[0]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to row[1]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to row[2]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to row
+
+
+set_location_assignment PIN_AH19 -to beep
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to beep
